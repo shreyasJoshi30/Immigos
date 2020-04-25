@@ -20,6 +20,31 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="5dp"
+                        android:text="Range: "
+                        android:id="@+id/tv_range"
+                       />
+
+                    <SeekBar
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:max="9"
+                        android:id="@+id/sb_range"
+                        android:theme="@style/Widget.AppCompat.SeekBar.Discrete"
+                       />
+
+                </LinearLayout>
+
+                
+
 
             <!-- Buttons -->
             <LinearLayout

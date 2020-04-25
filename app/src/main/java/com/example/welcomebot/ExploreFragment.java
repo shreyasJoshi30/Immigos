@@ -16,6 +16,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.RelativeLayout;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -66,7 +67,10 @@ public class ExploreFragment extends Fragment implements EasyPermissions.Permiss
     Bundle savedInstance;
     LocationBean locationBean;
     Location currentLocation;
-
+    String type ="";
+    SeekBar range;
+    TextView tv_range;
+    int rangeValue=2;
 
     FirebaseFirestore db;
     private FusedLocationProviderClient fusedLocationClient;
@@ -84,7 +88,8 @@ public class ExploreFragment extends Fragment implements EasyPermissions.Permiss
         savedInstance = savedInstanceState;
         loadMap(rootView,savedInstance);
         setHasOptionsMenu(true);
-
+        range = (SeekBar)rootView.findViewById(R.id.sb_range);
+        tv_range = (TextView) rootView.findViewById(R.id.tv_range);
 
 
         //__________ on click listeners for map categories________________
@@ -95,7 +100,7 @@ public class ExploreFragment extends Fragment implements EasyPermissions.Permiss
             public void onClick(View v) {
 
                 View view = getView().findViewById(R.id.filterCard);
-                String type = "Sport";
+                type = "Sport";
                  fetchData(type);
                 view.setVisibility(View.GONE);
                 Toast.makeText(getActivity(), "button clicked!", Toast.LENGTH_LONG).show();
@@ -111,7 +116,7 @@ public class ExploreFragment extends Fragment implements EasyPermissions.Permiss
             public void onClick(View v) {
 
                 View view = getView().findViewById(R.id.filterCard);
-                String type = "Library";
+                type = "Library";
                 fetchData(type);
                 view.setVisibility(View.GONE);
                 Toast.makeText(getActivity(), "button clicked!", Toast.LENGTH_LONG).show();
@@ -125,7 +130,7 @@ public class ExploreFragment extends Fragment implements EasyPermissions.Permiss
             public void onClick(View v) {
 
                 View view = getView().findViewById(R.id.filterCard);
-                String type = "Market";
+                type = "Market";
                 fetchData(type);
                 view.setVisibility(View.GONE);
                 Toast.makeText(getActivity(), "button clicked!", Toast.LENGTH_LONG).show();
@@ -138,7 +143,7 @@ public class ExploreFragment extends Fragment implements EasyPermissions.Permiss
             public void onClick(View v) {
 
                 View view = getView().findViewById(R.id.filterCard);
-                String type = "Art";
+                type = "Art";
                 fetchData(type);
                 view.setVisibility(View.GONE);
                 Toast.makeText(getActivity(), "button clicked!", Toast.LENGTH_LONG).show();
@@ -152,7 +157,7 @@ public class ExploreFragment extends Fragment implements EasyPermissions.Permiss
             public void onClick(View v) {
 
                 View view = getView().findViewById(R.id.filterCard);
-                String type = "Food";
+                type = "Food";
                 fetchData(type);
                 view.setVisibility(View.GONE);
                 Toast.makeText(getActivity(), "button clicked!", Toast.LENGTH_LONG).show();
@@ -160,15 +165,28 @@ public class ExploreFragment extends Fragment implements EasyPermissions.Permiss
             }
         });
 
+        range.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                tv_range.setText("Range: "+ String.valueOf(progress));
+                rangeValue=progress;
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                fetchData(type);
+            }
+        });
+
 
         return rootView;
 
     }
-
-
-
-
-
 
 
     @Override
@@ -232,12 +250,12 @@ public class ExploreFragment extends Fragment implements EasyPermissions.Permiss
                     googleMap.setMyLocationEnabled(true);
 
                 // For dropping a marker at a point on the Map
-                LatLng melbourne = new LatLng(-37.814, 144.96332);
+                /*LatLng melbourne = new LatLng(-37.814, 144.96332);
                 //googleMap.addMarker(new MarkerOptions().position(melbourne).title("Marker Title").snippet("Marker Description"));
 
                 // For zooming automatically to the location of the marker
                 CameraPosition cameraPosition = new CameraPosition.Builder().target(melbourne).zoom(12).build();
-                googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+                googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));*/
             }
         });
 
@@ -251,6 +269,13 @@ public class ExploreFragment extends Fragment implements EasyPermissions.Permiss
                         currentLocation = location;
                         double lat =  currentLocation.getLatitude();
                         double lon = currentLocation.getLongitude();
+                        LatLng currentLoc = new LatLng(lat, lon);
+
+                        // For zooming automatically to the location of the marker
+                        CameraPosition cameraPosition = new CameraPosition.Builder().target(currentLoc).zoom(12).build();
+                        googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+
+
                         //Toast.makeText(getContext(), "Current Location found", Toast.LENGTH_SHORT).show();
                     }
                 }
@@ -320,6 +345,10 @@ public class ExploreFragment extends Fragment implements EasyPermissions.Permiss
     }
 
     public void fetchData(String type) {
+        googleMap.clear();
+        if(type.equals("")){
+            type="Market";
+        }
 
         db = FirebaseFirestore.getInstance();
         List<LocationBean> locationBeanList = new ArrayList<LocationBean>();
@@ -337,7 +366,7 @@ public class ExploreFragment extends Fragment implements EasyPermissions.Permiss
 
                                 //Log.i("the response", response);
 
-                                Location location = new Location("Mock");
+                                Location location = new Location("loc");
                                 locationBean = new LocationBean();
                                 for (Map.Entry m : document.getData().entrySet()) {
 
@@ -385,7 +414,7 @@ public class ExploreFragment extends Fragment implements EasyPermissions.Permiss
                             for (int i = 0; i < locationBeanList.size(); i++) {
 
                                 float distance = currentLocation.distanceTo(locationBeanList.get(i).getLocation());
-                                if (distance <= 5000) {
+                                if (distance <= (rangeValue*1000)) {
 
                                 LatLng coordinates = new LatLng(locationBeanList.get(i).getLocation().getLatitude(), locationBeanList.get(i).getLocation().getLongitude());
                                 String title = locationBeanList.get(i).getName();
