@@ -2,9 +2,13 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
 
-    <item android:id="@+id/nav_home"
+    <item android:id="@+id/nav_landingPage"
         android:icon="@drawable/ic_home_black_24dp"
         android:title="Home" />
+
+    <item android:id="@+id/nav_home"
+        android:icon="@drawable/ic_news_white_24dp"
+        android:title="News" />
 
     <item android:id="@+id/nav_chat"
         android:icon="@drawable/ic_chat_black_24dp"
@@ -17,6 +21,10 @@
     <item android:id="@+id/nav_explore"
         android:icon="@drawable/ic_map_black_24dp"
         android:title="Explore" />
+
+
+
+
 
 
 

@@ -2,28 +2,78 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@drawable/gradient">
+
+
+    <ScrollView
+        android:id="@+id/introScrollView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        >
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/introCard"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="15dp"
+        android:elevation="9dp"
+        app:cardCornerRadius="9dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <!-- Title, secondary and supporting text -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/tv_chatIntro"
+                    android:textSize="16dp"
+                    android:textAppearance="?attr/textAppearanceBody1"
+                    />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:id="@+id/tv_chatQuestions"
+                    android:textSize="12dp"
+                    android:textAppearance="?attr/textAppearanceBody2"
+
+                    />
+
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </com.google.android.material.card.MaterialCardView>
+
+    </ScrollView>
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:background="@android:color/white"
+        android:background="@drawable/gradient"
         android:gravity="bottom"
         android:paddingBottom="9dp"
         android:paddingEnd="8dp"
         android:paddingStart="8dp"
         android:paddingTop="8dp"
         android:id="@+id/inputLayout">
-        <!--android:layout_alignParentBottom="true"-->
 
-        <!--<ai.api.ui.AIButton-->
-        <!--android:id="@+id/micButton"-->
-        <!--style="@style/ApiAi.Microphone"-->
-        <!--android:layout_height="152dp"-->
-        <!--android:layout_alignParentStart="true"-->
-        <!--android:layout_gravity="center_horizontal"-->
-        <!--android:visibility="visible" />-->
+
+
 
         <ImageView
             android:id="@+id/sendBtn"
@@ -55,6 +105,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_above="@+id/inputLayout">
+
 
         <LinearLayout
             android:id="@+id/chatLayout"

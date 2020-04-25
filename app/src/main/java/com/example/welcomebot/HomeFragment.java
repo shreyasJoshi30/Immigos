@@ -1,55 +1,37 @@
 package com.example.welcomebot;
 
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.media.Image;
-import android.os.AsyncTask;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.speech.tts.TextToSpeech;
-import android.text.Layout;
-import android.util.Log;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.FrameLayout;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 
-
-
-
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
+import com.bumptech.glide.Glide;
 import com.google.android.material.card.MaterialCardView;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.Query;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
-//import com.squareup.picasso.Picasso;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -72,31 +54,153 @@ public class HomeFragment extends Fragment {
     LinearLayout containerCardLayout;
     String newsAPIKey;
     String eventBriteAPI_key;
+    String country = "au";
+    String newsCategory = "";
+
+    //used for reinflating view
+    private LayoutInflater mInflater;
+    private ViewGroup mContainer;
+    String clickable = "Tap the card to view more...";
+    String clickable_chinese = "点按该卡可查看更多...";
+    Button btn_business;
+    Button btn_entertainment;
+    Button btn_health ;
+    Button btn_science;
+    Button btn_sports;
+    Button btn_technology;
+
+
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 
-        rootView = inflater.inflate(R.layout.fragment_home,container,false);
 
-        /*containerCardLayout  = new LinearLayout(getActivity());
-        containerCardLayout.setLayoutParams(scrollParams);
-        scrollParams = new ScrollView.LayoutParams(ScrollView.LayoutParams.MATCH_PARENT, ScrollView.LayoutParams.MATCH_PARENT);
-        scrollView = new ScrollView(getActivity());
-        scrollView.setLayoutParams(scrollParams);
-        homeLayout.addView(scrollView);
-*/
+        mInflater = inflater;
+        mContainer = container;
+        rootView = inflater.inflate(R.layout.fragment_home,container,false);
+        setHasOptionsMenu(true);
         eventBriteAPI_key = getActivity().getResources().getString(R.string.eventBriteAPI_key);
         newsAPIKey = getActivity().getResources().getString(R.string.newsAPI_key);
         layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
         cardParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-        getNews();
+        getNews(country,newsCategory);
+
+
+        btn_business = (Button) rootView.findViewById(R.id.btn_business);
+        btn_business.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                homeLayout.removeAllViews();
+                getNews(country,"business");
+            }
+        });
+
+
+        btn_entertainment = (Button) rootView.findViewById(R.id.btn_entertainment);
+        btn_entertainment.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                homeLayout.removeAllViews();
+                getNews(country,"entertainment");
+            }
+        });
+
+
+        btn_health = (Button) rootView.findViewById(R.id.btn_health);
+        btn_health.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                homeLayout.removeAllViews();
+                getNews(country,"health");
+            }
+        });
+
+       btn_science = (Button) rootView.findViewById(R.id.btn_science);
+        btn_science.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                homeLayout.removeAllViews();
+                getNews(country,"science");
+            }
+        });
+        btn_sports = (Button) rootView.findViewById(R.id.btn_sports);
+        btn_sports.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                homeLayout.removeAllViews();
+                getNews(country,"sports");
+            }
+        });
+        btn_technology = (Button) rootView.findViewById(R.id.btn_technology);
+        btn_technology.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                homeLayout.removeAllViews();
+                getNews(country,"technology");
+            }
+        });
+
+
 
        return rootView;
     }
 
 
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
 
+        inflater.inflate(R.menu.custom_toolbar, menu);
+        super.onCreateOptionsMenu(menu, inflater);
+        MenuItem item  = menu.findItem(R.id.app_bar_search);
+        item.setVisible(false);
+
+    }
+
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        if(id == R.id.app_bar_China){
+            homeLayout.removeAllViews();
+            country = "cn";
+            newsCategory="";
+            changeLabelToChinese();
+            getNews(country,newsCategory);
+        }
+
+        if(id == R.id.app_bar_australia){
+            country = "au";
+            newsCategory="";
+            homeLayout.removeAllViews();
+            changeLabelToEnglish();
+            getNews(country,newsCategory);
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    public void changeLabelToChinese(){
+        btn_business.setText("商业");
+        btn_entertainment.setText("娱乐");
+        btn_health.setText("健康");
+        btn_science.setText("科学");
+        btn_sports.setText("体育");
+        btn_technology.setText("技术");
+
+
+    }
+
+    public void changeLabelToEnglish(){
+        btn_business.setText("Business");
+        btn_entertainment.setText("Entertainment");
+        btn_health.setText("Health");
+        btn_science.setText("Science");
+        btn_sports.setText("Sports");
+        btn_technology.setText("Technology");
+
+    }
 
     public void run () throws IOException{
 
@@ -135,16 +239,23 @@ public class HomeFragment extends Fragment {
 
     }
 
-    public void getNews(){
 
 
+
+    public void getNews(String country, String newsCategory){
 
         OkHttpClient client = new OkHttpClient().newBuilder()
                 .build();
+
+        StringBuilder requestURL = new StringBuilder("http://newsapi.org/v2/top-headlines?");
+        requestURL.append("country="+country);
+        if(!newsCategory.equals("")){
+            requestURL.append("&category="+newsCategory);
+        }
+        requestURL.append("&apiKey="+newsAPIKey);
         Request request = new Request.Builder()
-                .url("http://newsapi.org/v2/top-headlines?country=au&apiKey="+newsAPIKey)
+                .url(requestURL.toString())
                 .method("GET", null)
-               // .addHeader("content_type", "application/json")
                 .build();
 
         client.newCall(request).enqueue(new Callback() {
@@ -158,9 +269,11 @@ public class HomeFragment extends Fragment {
 
                 String newsResponse = response.body().string();
 
-                getActivity().runOnUiThread(new Runnable() {
+                new Handler(Looper.getMainLooper()).post(new Runnable() {
                     @Override
                     public void run() {
+                        // Code here will run in UI thread
+
 
                         try {
                             JSONObject newsObject = new JSONObject(newsResponse);
@@ -170,34 +283,29 @@ public class HomeFragment extends Fragment {
                             scrollParams = new ScrollView.LayoutParams(ScrollView.LayoutParams.MATCH_PARENT, ScrollView.LayoutParams.MATCH_PARENT);
                             scrollView = new ScrollView(getActivity());
                             scrollView.setLayoutParams(scrollParams);
-
                             homeLayout.addView(scrollView);
                             containerCardLayout  = new LinearLayout(getActivity());
                             containerCardLayout.setLayoutParams(scrollParams);
                             containerCardLayout.setOrientation(LinearLayout.VERTICAL);
                             scrollView.addView(containerCardLayout);
 
-
-
                             for (int i = 0; i < Jarray.length(); i++) {
                                 JSONObject object = Jarray.getJSONObject(i);
 
                                 String title  = object.getString("title");
                                 String desc = object.getString("description");
-                                String url = object.getString("urlToImage");
+                                String imageurl = object.getString("urlToImage");
                                 String content = object.getString("content");
+                                String newsUrl = object.getString("url");
                                 //ImageView newsImage =  new ImageView(getActivity());
 
-                                /*URL newurl = new URL(url);
-                                Bitmap mIcon_val = BitmapFactory.decodeStream(newurl.openConnection().getInputStream());
-                                newsImage.setImageBitmap(mIcon_val);*/
                                 //create multiple cards....
 
                                 layoutParams.setMargins(30,30,30,30);
 
-                                MaterialCardView cardView = createCard(title,desc,content);
-                                containerCardLayout.addView(cardView,layoutParams);
+                                MaterialCardView cardView = createCard(title,desc,content,newsUrl,imageurl);
 
+                                containerCardLayout.addView(cardView,layoutParams);
 
                             }
 
@@ -217,20 +325,13 @@ public class HomeFragment extends Fragment {
 
 
 
-    public MaterialCardView  createCard(String title, String desc,String content){
-        //,String imageURL,String content
+    public MaterialCardView  createCard(String title, String desc, String content, String newsUrl, String imageurl){
 
         LinearLayout cardLayout = new LinearLayout(getActivity());
-
         cardLayout.setOrientation(LinearLayout.VERTICAL);
-        LinearLayout.LayoutParams LLParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT
+            LinearLayout.LayoutParams LLParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT
                 ,LinearLayout.LayoutParams.MATCH_PARENT);
-       // LL.setWeightSum(6f);
         cardLayout.setLayoutParams(LLParams);
-        //ImageView ladder = new ImageView(this);
-        //ladder.setImageResource(R.drawable.ic_launcher);
-
-
 
         MaterialCardView cardView = new MaterialCardView(getActivity());
         cardView.setRadius(15);
@@ -244,9 +345,8 @@ public class HomeFragment extends Fragment {
         TextView newsTitle = new TextView(getActivity());
         newsTitle.setLayoutParams(layoutParams);
         newsTitle.setText(title);
-        newsTitle.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 20);
+        newsTitle.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 18);
         newsTitle.setTextColor(Color.BLACK);
-
 
         // Textview that will contain the short description
         TextView tv = new TextView(getActivity());
@@ -256,16 +356,22 @@ public class HomeFragment extends Fragment {
         tv.setTextColor(Color.BLACK);
 
         ImageView newsImage = new ImageView(getActivity());
-        newsImage.setLayoutParams(layoutParams);
         newsImage.setScaleType(ImageView.ScaleType.FIT_CENTER);
-        newsImage.setImageResource(R.drawable.ic_whatshot_black_24dp);
+        Glide.with(getActivity()).load(imageurl).into(newsImage);
+        //newsImage.setImageResource(R.drawable.ic_whatshot_black_24dp);
 
+        // Textview that will contain the short content
 
-
-        // Textview that will contain the short description
         TextView tvContent = new TextView(getActivity());
         tvContent.setLayoutParams(layoutParams);
-        tvContent.setText(content);
+
+        if(country.equals("au") || country.equals("") ){
+            tvContent.setText(clickable);
+        }
+        else{
+            tvContent.setText(clickable_chinese);
+        }
+
         tvContent.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 12);
         tvContent.setTextColor(Color.BLACK);
 
@@ -276,15 +382,23 @@ public class HomeFragment extends Fragment {
             tvContent.setJustificationMode(JUSTIFICATION_MODE_INTER_WORD);
         }
 
-        //cardLayout.addView(newsImage);
+        cardView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //String url = "https://www.youtube.com";
+                Uri uriUrl = Uri.parse(newsUrl);
+                Intent launchBrowser = new Intent(Intent.ACTION_VIEW, uriUrl);
+                startActivity(launchBrowser);
+            }
+        });
+
+        cardLayout.addView(newsImage);
         //scrollView.setLayoutParams(layoutParams);
         //scrollView.addView(cardLayout);
         cardLayout.addView(newsTitle);
         cardLayout.addView(tv);
         cardLayout.addView(tvContent);
         cardView.addView(cardLayout);
-
-
         return cardView;
 
     }

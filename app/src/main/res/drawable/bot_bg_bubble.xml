@@ -1,7 +1,8 @@
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
     android:shape="rectangle">
-    <solid android:color="#CBEEEE" />
-
+    <solid android:color="#fff2de" />
+    <!--CBEEEE-->
+    chatfr
     <corners android:topLeftRadius="1dp" android:radius="16dp" />
 </shape>
 

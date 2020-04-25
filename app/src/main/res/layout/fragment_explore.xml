@@ -11,7 +11,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="1dp"
-        android:visibility="invisible">
+        android:visibility="invisible"
+        android:animateLayoutChanges="true"
+        >
         <!--android:layout_alignParentBottom="true"-->
         <LinearLayout
             android:layout_width="match_parent"
@@ -25,15 +27,59 @@
                 android:layout_height="wrap_content"
                 android:layout_margin="8dp"
                 android:orientation="horizontal"
+                android:weightSum="10"
                 >
 
                 <Button
-                    android:id="@+id/applyFilter"
+                    android:id="@+id/btn_sports"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:background="@drawable/button_background"
-                    android:text="Apply"
-                    android:onClick="onButtonClicked"/>
+                    android:text="Sports"
+                    android:layout_weight="2"
+                    android:textSize="11dp"
+                    android:layout_marginHorizontal="5dp"/>
+
+                <Button
+                    android:id="@+id/btn_libraries"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/button_background"
+                    android:text="Libraries"
+                    android:textSize="11dp"
+                    android:layout_weight="2"
+                    android:layout_marginHorizontal="5dp"/>
+
+                <Button
+                    android:id="@+id/btn_markets"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/button_background"
+                    android:text="Markets"
+                    android:textSize="11dp"
+                    android:layout_weight="2"
+                    android:layout_marginHorizontal="5dp"/>
+
+
+                <Button
+                    android:id="@+id/btn_food"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/button_background"
+                    android:text="Food"
+                    android:textSize="11dp"
+                    android:layout_weight="2"
+                    android:layout_marginHorizontal="5dp"/>
+
+                <Button
+                    android:id="@+id/btn_art"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/button_background"
+                    android:text="Art"
+                    android:textSize="11dp"
+                    android:layout_weight="2"
+                    android:layout_marginHorizontal="5dp"/>
 
             </LinearLayout>
 

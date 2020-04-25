@@ -3,6 +3,8 @@ package com.example.welcomebot;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
@@ -18,17 +20,20 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 
-
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
@@ -60,9 +65,14 @@ public class ExploreFragment extends Fragment implements EasyPermissions.Permiss
     View rootView;
     Bundle savedInstance;
     LocationBean locationBean;
+    Location currentLocation;
 
 
     FirebaseFirestore db;
+    private FusedLocationProviderClient fusedLocationClient;
+
+
+
 
 
     @Nullable
@@ -73,17 +83,77 @@ public class ExploreFragment extends Fragment implements EasyPermissions.Permiss
         rootView = inflater.inflate(R.layout.fragment_explore, container, false);
         savedInstance = savedInstanceState;
         loadMap(rootView,savedInstance);
-
         setHasOptionsMenu(true);
 
 
-        Button filterButton = (Button) rootView.findViewById(R.id.applyFilter);
+
+        //__________ on click listeners for map categories________________
+
+        Button filterButton = (Button) rootView.findViewById(R.id.btn_sports);
         filterButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
                 View view = getView().findViewById(R.id.filterCard);
-                 fetchData();
+                String type = "Sport";
+                 fetchData(type);
+                view.setVisibility(View.GONE);
+                Toast.makeText(getActivity(), "button clicked!", Toast.LENGTH_LONG).show();
+
+            }
+        });
+
+        //Art,Food,
+
+        Button libraryBtn = (Button) rootView.findViewById(R.id.btn_libraries);
+        libraryBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                View view = getView().findViewById(R.id.filterCard);
+                String type = "Library";
+                fetchData(type);
+                view.setVisibility(View.GONE);
+                Toast.makeText(getActivity(), "button clicked!", Toast.LENGTH_LONG).show();
+
+            }
+        });
+
+        Button marketBtn = (Button) rootView.findViewById(R.id.btn_markets);
+        marketBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                View view = getView().findViewById(R.id.filterCard);
+                String type = "Market";
+                fetchData(type);
+                view.setVisibility(View.GONE);
+                Toast.makeText(getActivity(), "button clicked!", Toast.LENGTH_LONG).show();
+
+            }
+        });
+       Button artBtn = (Button) rootView.findViewById(R.id.btn_art);
+        artBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                View view = getView().findViewById(R.id.filterCard);
+                String type = "Art";
+                fetchData(type);
+                view.setVisibility(View.GONE);
+                Toast.makeText(getActivity(), "button clicked!", Toast.LENGTH_LONG).show();
+
+            }
+        });
+
+        Button foodBtn = (Button) rootView.findViewById(R.id.btn_food);
+        foodBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                View view = getView().findViewById(R.id.filterCard);
+                String type = "Food";
+                fetchData(type);
                 view.setVisibility(View.GONE);
                 Toast.makeText(getActivity(), "button clicked!", Toast.LENGTH_LONG).show();
 
@@ -96,11 +166,24 @@ public class ExploreFragment extends Fragment implements EasyPermissions.Permiss
     }
 
 
+
+
+
+
+
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
 
         inflater.inflate(R.menu.custom_toolbar, menu);
+
+        MenuItem china  = menu.findItem(R.id.app_bar_China);
+        china.setVisible(false);
+        MenuItem aus  = menu.findItem(R.id.app_bar_australia);
+        aus.setVisible(false);
+
         super.onCreateOptionsMenu(menu, inflater);
+
+
     }
 
 
@@ -150,7 +233,7 @@ public class ExploreFragment extends Fragment implements EasyPermissions.Permiss
 
                 // For dropping a marker at a point on the Map
                 LatLng melbourne = new LatLng(-37.814, 144.96332);
-                googleMap.addMarker(new MarkerOptions().position(melbourne).title("Marker Title").snippet("Marker Description"));
+                //googleMap.addMarker(new MarkerOptions().position(melbourne).title("Marker Title").snippet("Marker Description"));
 
                 // For zooming automatically to the location of the marker
                 CameraPosition cameraPosition = new CameraPosition.Builder().target(melbourne).zoom(12).build();
@@ -158,15 +241,21 @@ public class ExploreFragment extends Fragment implements EasyPermissions.Permiss
             }
         });
 
-            View locationButton = ((View) mMapView.findViewById(Integer.parseInt("1")).getParent()).findViewById(Integer.parseInt("2"));
-            RelativeLayout.LayoutParams rlp = (RelativeLayout.LayoutParams) locationButton.getLayoutParams();
-            // position on right bottom
-            rlp.addRule(RelativeLayout.ALIGN_PARENT_TOP, 0);
-            rlp.addRule(RelativeLayout.ALIGN_PARENT_TOP, RelativeLayout.TRUE);
-            rlp.setMargins(0, 1300, 180, 0);
+            fusedLocationClient = LocationServices.getFusedLocationProviderClient(getActivity());
 
+            //get current permission and initialise the location object
+            fusedLocationClient.getLastLocation().addOnSuccessListener(getActivity(), new OnSuccessListener<Location>() {
+                @Override
+                public void onSuccess(Location location) {
+                    if(location!= null){
+                        currentLocation = location;
+                        double lat =  currentLocation.getLatitude();
+                        double lon = currentLocation.getLongitude();
+                        //Toast.makeText(getContext(), "Current Location found", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            });
             }
-
             else {
                EasyPermissions.requestPermissions(getActivity(),"This application requires your location access to load maps",
                        REQUEST_LOCATION_PERMISSION,perms);
@@ -230,13 +319,13 @@ public class ExploreFragment extends Fragment implements EasyPermissions.Permiss
         EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this);
     }
 
-    public void fetchData() {
+    public void fetchData(String type) {
 
         db = FirebaseFirestore.getInstance();
         List<LocationBean> locationBeanList = new ArrayList<LocationBean>();
 
-
-        db.collection("locationData").orderBy("Name").limit(5)
+//.orderBy("Type").limit(5)
+        db.collection("locationData").whereEqualTo("Type",type)
                 .get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
@@ -245,7 +334,7 @@ public class ExploreFragment extends Fragment implements EasyPermissions.Permiss
                             for (QueryDocumentSnapshot document : task.getResult()) {
 
                                 //String response = document.getId() + " => " + document.getData();
-                                System.out.println("Shreyas");
+
                                 //Log.i("the response", response);
 
                                 Location location = new Location("Mock");
@@ -295,9 +384,22 @@ public class ExploreFragment extends Fragment implements EasyPermissions.Permiss
 
                             for (int i = 0; i < locationBeanList.size(); i++) {
 
-                                LatLng melbourne = new LatLng(locationBeanList.get(i).getLocation().getLatitude(), locationBeanList.get(i).getLocation().getLongitude());
-                                googleMap.addMarker(new MarkerOptions().position(melbourne).title(locationBeanList.get(i).getName()).snippet(locationBeanList.get(i).getDescription()));
+                                float distance = currentLocation.distanceTo(locationBeanList.get(i).getLocation());
+                                if (distance <= 5000) {
 
+                                LatLng coordinates = new LatLng(locationBeanList.get(i).getLocation().getLatitude(), locationBeanList.get(i).getLocation().getLongitude());
+                                String title = locationBeanList.get(i).getName();
+                                String desc = locationBeanList.get(i).getDescription();
+
+                                googleMap.addMarker(
+                                        new MarkerOptions()
+                                                .position(coordinates)
+                                                .title(title)
+                                                .snippet(desc)
+
+                                );
+
+                            }
                             }
 
                         }

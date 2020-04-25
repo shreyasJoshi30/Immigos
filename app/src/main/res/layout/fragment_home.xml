@@ -2,10 +2,118 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:id="@+id/rootHomeID"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:background="@drawable/gradient">
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/filterCard"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="1dp"
+        android:visibility="visible"
+        android:animateLayoutChanges="true"
+        >
+        <!--android:layout_alignParentBottom="true"-->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+
+            <HorizontalScrollView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+
+
+            <!-- Buttons -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="8dp"
+                android:orientation="horizontal"
+                >
+
+                <Button
+                    android:id="@+id/btn_business"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/btn_selector"
+                    android:text="Business"
+                    android:onClick="onButtonClicked"
+                    android:textSize="11dp"
+                    android:layout_marginHorizontal="5dp"/>
+
+                <Button
+                    android:id="@+id/btn_entertainment"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/btn_selector"
+                    android:text="Entertainment"
+                    android:onClick="onButtonClicked"
+                    android:textSize="11dp"
+                    android:layout_marginHorizontal="5dp"/>
+
+                <Button
+                    android:id="@+id/btn_health"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/btn_selector"
+                    android:text="Health"
+                    android:onClick="onButtonClicked"
+                    android:textSize="11dp"
+                    android:layout_marginHorizontal="5dp"/>
+
+
+                <Button
+                    android:id="@+id/btn_science"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/btn_selector"
+                    android:text="Science"
+                    android:textSize="11dp"
+                    android:layout_marginHorizontal="5dp"/>
+
+                <Button
+                    android:id="@+id/btn_sports"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/btn_selector"
+                    android:text="Sports"
+                    android:onClick="onButtonClicked"
+                    android:textSize="11dp"
+                    android:layout_marginHorizontal="5dp"/>
+
+
+                <Button
+                    android:id="@+id/btn_technology"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/btn_selector"
+                    android:text="Technology"
+                    android:onClick="onButtonClicked"
+                    android:textSize="11dp"
+                    android:layout_marginHorizontal="5dp"/>
+
+            </LinearLayout>
+
+            </HorizontalScrollView>
+
+        </LinearLayout>
+
+    </com.google.android.material.card.MaterialCardView>
+
+
+
+<LinearLayout android:layout_width="match_parent"
+    android:layout_height="match_parent"
     android:id="@+id/homeID"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical">
-
+    android:orientation="vertical"
+    android:background="@drawable/gradient">
+</LinearLayout>
 
 
 
