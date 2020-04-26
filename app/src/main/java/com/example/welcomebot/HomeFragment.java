@@ -87,6 +87,9 @@ public class HomeFragment extends Fragment {
         getNews(country,newsCategory);
 
 
+        //--------------------Button onclick listeners ---------------------------
+
+
         btn_business = (Button) rootView.findViewById(R.id.btn_business);
         btn_business.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -157,7 +160,11 @@ public class HomeFragment extends Fragment {
 
     }
 
-
+    /**
+     * Overridden method to handle actionbar menu
+     * @param item
+     * @return
+     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
@@ -181,6 +188,11 @@ public class HomeFragment extends Fragment {
         return super.onOptionsItemSelected(item);
     }
 
+
+    /**
+     * methods to toggle label changes
+     */
+
     public void changeLabelToChinese(){
         btn_business.setText("商业");
         btn_entertainment.setText("娱乐");
@@ -202,7 +214,7 @@ public class HomeFragment extends Fragment {
 
     }
 
-    public void run () throws IOException{
+   /* public void run () throws IOException{
 
         OkHttpClient client = new OkHttpClient().newBuilder()
                 .build();
@@ -235,13 +247,14 @@ public class HomeFragment extends Fragment {
 
             }
         });
+    }*/
 
 
-    }
-
-
-
-
+    /**
+     * getnews fetches news with respect to country and category
+     * @param country
+     * @param newsCategory
+     */
     public void getNews(String country, String newsCategory){
 
         OkHttpClient client = new OkHttpClient().newBuilder()
@@ -323,8 +336,15 @@ public class HomeFragment extends Fragment {
     }
 
 
-
-
+    /**
+     * The method is used to create dynamic material cardviews for displaying news
+     * @param title
+     * @param desc
+     * @param content
+     * @param newsUrl
+     * @param imageurl
+     * @return
+     */
     public MaterialCardView  createCard(String title, String desc, String content, String newsUrl, String imageurl){
 
         LinearLayout cardLayout = new LinearLayout(getActivity());

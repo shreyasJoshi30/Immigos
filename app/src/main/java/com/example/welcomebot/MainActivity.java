@@ -24,7 +24,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         setTitle("Immigos");
-
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         BottomNavigationView bottomNav = findViewById(R.id.bottom_navigationid);
@@ -39,7 +38,6 @@ public class MainActivity extends AppCompatActivity {
                 selectedFragment).commit();
         getSupportActionBar().setBackgroundDrawable(new ColorDrawable(Color.parseColor("#3c529e")));
         //getSupportActionBar().setTitle(Html.fromHtml("<font color='#000000'>Immigos </font>"));
-
 
 
     }

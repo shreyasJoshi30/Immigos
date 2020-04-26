@@ -30,7 +30,7 @@
                 android:layout_height="194dp"
                 app:srcCompat="@drawable/home_image"
                 android:scaleType="centerCrop"
-                android:contentDescription="This is an aimage an it i vety good"
+                android:contentDescription="Landing Image"
                 />
 
             <LinearLayout

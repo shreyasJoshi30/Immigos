@@ -13,7 +13,9 @@ import ai.api.model.AIRequest;
 import ai.api.model.AIResponse;
 import androidx.fragment.app.Fragment;
 
-
+/**
+ * The class makes use of method to handle dialogflow requests in asnc manner
+ */
 public class RequestTask extends AsyncTask<AIRequest, Void, AIResponse> {
 
     Activity activity;

@@ -29,7 +29,9 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.card.MaterialCardView;
 import com.google.firebase.ml.common.modeldownload.FirebaseModelDownloadConditions;
 import com.google.firebase.ml.naturallanguage.FirebaseNaturalLanguage;
@@ -50,6 +52,8 @@ import ai.api.model.AIResponse;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.Observer;
 
 public class ChatFragment extends Fragment {
 
@@ -74,6 +78,8 @@ public class ChatFragment extends Fragment {
 
     String translatedText="";
     String chineseTextToSpeak="";
+    Boolean isAuCndownloaded  = false;
+    Boolean isCnAudownloaded = false;
 
     MaterialCardView introCardView;
     TextView tv_chatQuestions;
@@ -119,14 +125,26 @@ public class ChatFragment extends Fragment {
         chineseEnglishTranslator = FirebaseNaturalLanguage.getInstance().getTranslator(chineseToEnglishOptions);
         chineseToEnglishConditions = new FirebaseModelDownloadConditions.Builder()
                 .build();
+        chineseEnglishTranslator.downloadModelIfNeeded(chineseToEnglishConditions).addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
 
+                isCnAudownloaded = true;
+
+               // Toast.makeText(getContext(), "Chinese-English translator downloaded", Toast.LENGTH_LONG).show();
+            }
+        });
 
         dialogFlowKey = getActivity().getResources().getString(R.string.dialogflow_key);
 
-
+        englishChineseTranslator.downloadModelIfNeeded(englishToChineseConditions).addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                isAuCndownloaded  = true;
+               // Toast.makeText(getContext(), "English-Chinese translator downloaded", Toast.LENGTH_LONG).show();
+            }
+        });
      return rootview;
-
-
     }
 
     @Override
@@ -136,11 +154,13 @@ public class ChatFragment extends Fragment {
         super.onCreateOptionsMenu(menu, inflater);
         MenuItem item  = menu.findItem(R.id.app_bar_search);
         item.setVisible(false);
-
-
     }
 
-
+    /**
+     * overridden method to manage the menu options on the top
+     * @param item
+     * @return
+     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
@@ -182,7 +202,6 @@ public class ChatFragment extends Fragment {
     }
 
     public void changeLabelToEnglish(){
-
 
         StringBuilder englishIntro =  new StringBuilder("");
         englishIntro.append("    Hi there mate, I am Immigos chatbot. \n\nI can answer basic questions and will help you along to learn about Australian culture and explore Aussieland!\n" +
@@ -253,7 +272,7 @@ public class ChatFragment extends Fragment {
     }
 
 
-    public String translateToEnglish(String message){
+    /*public String translateToEnglish(String message){
 
         getActivity().runOnUiThread(new Runnable() {
             @Override
@@ -292,7 +311,7 @@ public class ChatFragment extends Fragment {
         });
 
                   return translatedText;
-    }
+    }*/
 
     private void fadeOutAndHideView(final MaterialCardView img)
     {
@@ -313,6 +332,11 @@ public class ChatFragment extends Fragment {
         img.startAnimation(fadeOut);
     }
 
+    /**
+     * sendMessage is used to send the query to dialogfow and make an async request to get bot's response
+     * The method alsp checks whether the input is in english or chinese and translates accordingly.
+     * @param view
+     */
     public void sendMessage(View view) {
 
         String msg = queryEditText.getText().toString();
@@ -328,6 +352,7 @@ public class ChatFragment extends Fragment {
                 public void onSuccess(String languageCode) {
 
                     if (languageCode != "und" && languageCode.equals("zh")) {
+
 
                         chineseEnglishTranslator.downloadModelIfNeeded(chineseToEnglishConditions).addOnSuccessListener(new OnSuccessListener<Void>() {
                             @Override
@@ -386,7 +411,12 @@ public class ChatFragment extends Fragment {
         }
     }
 
-
+    /**
+     * This method is used to display the reply based on user's / bot's text.
+     * The method also takes care of translation
+     * @param message
+     * @param type
+     */
     public void showTextView(String message, int type) {
 
         switch (type) {
@@ -395,77 +425,149 @@ public class ChatFragment extends Fragment {
                 TextView tv = layout.findViewById(R.id.chatMsg);
 
                 tv.setText(message);
+
+                layout.setFocusableInTouchMode(true);
+                chatLayout.addView(layout); // move focus to text view to automatically make it scroll up if softfocus
+                layout.requestFocus();
                 break;
             case BOT:
 
-                layout = getBotLayout();
 
-                TextView tv1 = layout.findViewById(R.id.chatMsg);
+                if (defaultLanguage.equals("au")) {
+
+                    String botResponseArray [] = message.split("\\|\\|");
+                    for(int i=0; i<botResponseArray.length;i++){
+
+                        layout = getBotLayout();
+                        TextView tv1 = layout.findViewById(R.id.chatMsg);
+                        tv1.setText(botResponseArray[i]);
+
+
+                        layout.setFocusableInTouchMode(true);
+                        chatLayout.addView(layout); // move focus to text view to automatically make it scroll up if softfocus
+                        layout.requestFocus();
+                    }
+
+                    mtts = new TextToSpeech(getActivity(), new TextToSpeech.OnInitListener() {
+                        @Override
+                        public void onInit(int status) {
+                            if (status == TextToSpeech.SUCCESS) {
+                                int result = 0;
+                                result = mtts.setLanguage(Locale.ENGLISH);
+
+                                float pitch = 1.0f;
+                                if (pitch < 0.1) pitch = 0.1f;
+                                float speed = 1.0f;
+                                mtts.setPitch(pitch);
+                                mtts.setSpeechRate(speed);
+                                for(int i=0; i<botResponseArray.length;i++){
+                                    mtts.speak(botResponseArray[i], TextToSpeech.QUEUE_FLUSH, null);
+                                }
+
+                            }
+                        }
+                    });
+                }
                 //tv1.setText(message);
-
-                mtts =  new TextToSpeech(getActivity(), new TextToSpeech.OnInitListener() {
+        else {
+                mtts = new TextToSpeech(getActivity(), new TextToSpeech.OnInitListener() {
                     @Override
                     public void onInit(int status) {
-                        if (status == TextToSpeech.SUCCESS){
-                            int result = 0;
-                            if(defaultLanguage.equals("cn")){
-                                result = mtts.setLanguage(Locale.CHINA);
-                            }
-                            else{
-                                result = mtts.setLanguage(Locale.ENGLISH);
-                            }
+                        if (status == TextToSpeech.SUCCESS) {
+                            int result = mtts.setLanguage(Locale.CHINA);
 
-                            if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED){
-                                Log.e("TTs","Language Not supported");
-                            }
-                            else {
+                            if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
+                                Log.e("TTs", "Language Not supported");
+                            } else {
                                 float pitch = 1.0f;
-                                if (pitch< 0.1) pitch = 0.1f;
+                                if (pitch < 0.1) pitch = 0.1f;
                                 float speed = 1.0f;
                                 mtts.setPitch(pitch);
                                 mtts.setSpeechRate(speed);
 
                                 if (defaultLanguage.equals("cn")) {
-                                englishChineseTranslator.downloadModelIfNeeded(englishToChineseConditions).addOnSuccessListener(new OnSuccessListener<Void>() {
-                                    @Override
-                                    public void onSuccess(Void aVoid) {
 
-                                        englishChineseTranslator.translate(message).addOnSuccessListener(new OnSuccessListener<String>() {
-                                            @Override
-                                            public void onSuccess(String s) {
-                                                tv1.setText(s);
-                                                chineseTextToSpeak=s;
-                                                if(!chineseTextToSpeak.equals("")){
-                                                    mtts.speak(s,TextToSpeech.QUEUE_FLUSH,null);
-                                                }
+                                    englishChineseTranslator.translate(message).addOnSuccessListener(new OnSuccessListener<String>() {
+                                        @Override
+                                        public void onSuccess(String s) {
+
+                                            String botResponseArray [] = s.split("\\|\\|");
+                                            for(int i=0; i<botResponseArray.length;i++){
+
+                                                layout = getBotLayout();
+                                                TextView tv1 = layout.findViewById(R.id.chatMsg);
+                                                tv1.setText(botResponseArray[i]);
+                                                mtts.speak(botResponseArray[i], TextToSpeech.QUEUE_FLUSH, null);
+
+                                                layout.setFocusableInTouchMode(true);
+                                                chatLayout.addView(layout); // move focus to text view to automatically make it scroll up if softfocus
+                                                layout.requestFocus();
                                             }
-                                        });
-                                    }
-                                });
-                            }
-                                if (chineseTextToSpeak.equals("")) {
-                                    mtts.speak(message,TextToSpeech.QUEUE_FLUSH,null);
+
+                                            //TextView tv1 = layout.findViewById(R.id.chatMsg);
+                                            //tv1.setText(s);
+                                            //chineseTextToSpeak = s;
+                                                  /*  if (!chineseTextToSpeak.equals("")) {
+
+                                                    }*/
+                                        }
+                                    });
+
+                                   /* englishChineseTranslator.downloadModelIfNeeded(englishToChineseConditions).addOnSuccessListener(new OnSuccessListener<Void>() {
+                                        @Override
+                                        public void onSuccess(Void aVoid) {
+
+                                            englishChineseTranslator.translate(message).addOnSuccessListener(new OnSuccessListener<String>() {
+                                                @Override
+                                                public void onSuccess(String s) {
+
+                                                    String botResponseArray [] = s.split("\\|\\|");
+                                                    for(int i=0; i<botResponseArray.length;i++){
+
+                                                        layout = getBotLayout();
+                                                        TextView tv1 = layout.findViewById(R.id.chatMsg);
+                                                        tv1.setText(botResponseArray[i]);
+                                                        mtts.speak(botResponseArray[i], TextToSpeech.QUEUE_FLUSH, null);
+
+                                                        layout.setFocusableInTouchMode(true);
+                                                        chatLayout.addView(layout); // move focus to text view to automatically make it scroll up if softfocus
+                                                        layout.requestFocus();
+                                                    }
+
+                                                    //TextView tv1 = layout.findViewById(R.id.chatMsg);
+                                                    //tv1.setText(s);
+                                                    //chineseTextToSpeak = s;
+                                                  *//*  if (!chineseTextToSpeak.equals("")) {
+
+                                                    }*//*
+                                                }
+                                            });
+                                        }
+                                    });*/
                                 }
+                                /*if (chineseTextToSpeak.equals("")) {
+                                    mtts.speak(message, TextToSpeech.QUEUE_FLUSH, null);
+                                }*/
                             }
-                        }
-                        else {
-                            Log.e("TTs","Language Not supported");
+                        } else {
+                            Log.e("TTs", "Language Not supported");
                         }
                     }
                 });
-                if(chineseTextToSpeak.equals("")){
+        }
+                /*if(chineseTextToSpeak.equals("")){
 
                     tv1.setText(message);
-                }
+                }*/
 
                 break;
             default:
                 layout = getBotLayout();
                 break;
         }
-        layout.setFocusableInTouchMode(true);
-        chatLayout.addView(layout); // move focus to text view to automatically make it scroll up if softfocus
-        layout.requestFocus();
+        //layout.setFocusableInTouchMode(true);
+        //chatLayout.addView(layout); // move focus to text view to automatically make it scroll up if softfocus
+        //layout.requestFocus();
         queryEditText.requestFocus(); // change focus back to edit text to continue typing
     }
 
@@ -479,17 +581,17 @@ public class ChatFragment extends Fragment {
         return (FrameLayout) inflater.inflate(R.layout.bot_msg_layout, null);
     }
 
+    /**
+     * The callback method to receive bot's response
+     * @param aiResponse
+     */
     public void callback(AIResponse aiResponse) {
         if (aiResponse != null) {
             // process aiResponse here
             String botReply = aiResponse.getResult().getFulfillment().getSpeech();
             Log.d(TAG, "Bot Reply: " + botReply);
 
-            String botResponseArray [] = botReply.split("\\|\\|");
-            for(int i=0;i<botResponseArray.length;i++){
-
-                showTextView(botResponseArray[i], BOT);
-            }
+            showTextView(botReply, BOT);
         } else {
             Log.d(TAG, "Bot Reply: Null");
             showTextView("There was a problem please try again!", BOT);

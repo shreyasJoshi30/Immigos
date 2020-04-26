@@ -219,6 +219,11 @@ public class ExploreFragment extends Fragment implements EasyPermissions.Permiss
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * loadMap methos is used to load maps on the screen and also used for getting user's current location
+     * @param view
+     * @param savedInstanceState
+     */
     private void loadMap(View view, Bundle savedInstanceState) {
         String[] perms = {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION};
 
@@ -289,6 +294,11 @@ public class ExploreFragment extends Fragment implements EasyPermissions.Permiss
     }
 
 
+    /**
+     * Methods tp ask permissions from the users
+     * @param requestCode
+     * @param perms
+     */
     @Override
     public void onPermissionsGranted(int requestCode, @NonNull List<String> perms) {
         loadMap(rootView,savedInstance);
@@ -344,6 +354,10 @@ public class ExploreFragment extends Fragment implements EasyPermissions.Permiss
         EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this);
     }
 
+    /**
+     * fetchData is used to get data from firebase
+     * @param type -  parameter used to filter the query from the dataset and plot the data on map based on results
+     */
     public void fetchData(String type) {
         googleMap.clear();
         if(type.equals("")){
@@ -352,9 +366,8 @@ public class ExploreFragment extends Fragment implements EasyPermissions.Permiss
 
         db = FirebaseFirestore.getInstance();
         List<LocationBean> locationBeanList = new ArrayList<LocationBean>();
-
-//.orderBy("Type").limit(5)
-        db.collection("locationData").whereEqualTo("Type",type)
+        //.orderBy("Type").limit(5)
+        db.collection("locationData").whereEqualTo("Classify",type)
                 .get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
@@ -436,12 +449,5 @@ public class ExploreFragment extends Fragment implements EasyPermissions.Permiss
 
                     }
                 });
-
-
-
-
-
     }
-
-
 }
