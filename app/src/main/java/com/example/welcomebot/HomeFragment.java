@@ -185,6 +185,14 @@ public class HomeFragment extends Fragment {
             getNews(country,newsCategory);
         }
 
+        if(id == R.id.app_bar_about){
+
+            Intent intent = new Intent(getActivity(), AboutActivity.class);
+            intent.putExtra("SCREEN", "about");
+            startActivity(intent);
+
+        }
+
         return super.onOptionsItemSelected(item);
     }
 

@@ -22,5 +22,10 @@
         app:showAsAction="always"/>
 
 
+    <item
+        android:id="@+id/app_bar_about"
+        android:title="About" />
+
+
 
 </menu>
