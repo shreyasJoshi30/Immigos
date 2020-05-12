@@ -1,6 +1,7 @@
 package com.example.welcomebot;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.speech.tts.TextToSpeech;
@@ -32,6 +33,7 @@ import android.widget.Toast;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.card.MaterialCardView;
 import com.google.firebase.ml.common.modeldownload.FirebaseModelDownloadConditions;
 import com.google.firebase.ml.naturallanguage.FirebaseNaturalLanguage;
@@ -51,9 +53,13 @@ import ai.api.model.AIRequest;
 import ai.api.model.AIResponse;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Observer;
+
+import static android.content.Context.MODE_PRIVATE;
 
 public class ChatFragment extends Fragment {
 
@@ -74,7 +80,7 @@ public class ChatFragment extends Fragment {
     FirebaseModelDownloadConditions englishToChineseConditions;
     FirebaseModelDownloadConditions chineseToEnglishConditions;
     FirebaseLanguageIdentification languageIdentifier;
-    String defaultLanguage = "au";
+    String defaultLanguage = "NA";
 
     String translatedText="";
     String chineseTextToSpeak="";
@@ -87,6 +93,8 @@ public class ChatFragment extends Fragment {
     View rootview;
     FrameLayout layout;
 
+    BottomNavigationView bottomNavigationView;
+
 
     @Nullable
     @Override
@@ -98,7 +106,11 @@ public class ChatFragment extends Fragment {
          introCardView = (MaterialCardView) rootview.findViewById(R.id.introCard);
          tv_chatIntro = (TextView) rootview.findViewById(R.id.tv_chatIntro);
          tv_chatQuestions =(TextView) rootview.findViewById(R.id.tv_chatQuestions);
-        changeLabelToEnglish();
+        //changeLabelToEnglish();
+        bottomNavigationView  = getActivity().findViewById(R.id.bottom_navigationid);
+
+        SharedPreferences pref = getActivity().getSharedPreferences("myPrefs",MODE_PRIVATE);
+        defaultLanguage =pref.getString("isChinese","au");
 
         // language detection initializer
          languageIdentifier = FirebaseNaturalLanguage.getInstance().getLanguageIdentification();
@@ -144,7 +156,22 @@ public class ChatFragment extends Fragment {
                // Toast.makeText(getContext(), "English-Chinese translator downloaded", Toast.LENGTH_LONG).show();
             }
         });
-     return rootview;
+
+        //---------------------back navigation-------------------
+        ((AppCompatActivity)getActivity()).getSupportActionBar().setHomeAsUpIndicator(null);
+        if(defaultLanguage.equals("cn")){
+            changeLabelToChinese();
+            ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle("新闻");
+
+        }
+        else{
+            changeLabelToEnglish();
+            ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle("Chat");
+
+        }
+
+
+        return rootview;
     }
 
     @Override
@@ -166,16 +193,36 @@ public class ChatFragment extends Fragment {
         int id = item.getItemId();
 
         if(id == R.id.app_bar_China){
-            defaultLanguage ="cn";
-            Toast.makeText(getActivity(), "Language switched to Chinese", Toast.LENGTH_LONG).show();
+
+            SharedPreferences pref = getActivity().getSharedPreferences("myPrefs",MODE_PRIVATE);
+            SharedPreferences.Editor editor = pref.edit();
+            editor.putString("isChinese","cn");
+            editor.commit();
+            defaultLanguage = "cn";
+            //Toast.makeText(getActivity(), "Language switched to Chinese", Toast.LENGTH_LONG).show();
             changeLabelToChinese();
 
         }
 
         if(id == R.id.app_bar_australia){
+
+            SharedPreferences pref = getActivity().getSharedPreferences("myPrefs",MODE_PRIVATE);
+            SharedPreferences.Editor editor = pref.edit();
+            editor.putString("isChinese","au");
+            editor.commit();
             defaultLanguage = "au";
-            Toast.makeText(getActivity(), "Language switched to English", Toast.LENGTH_LONG).show();
+            //Toast.makeText(getActivity(), "Language switched to English", Toast.LENGTH_LONG).show();
             changeLabelToEnglish();
+
+        }
+
+        if(id == android.R.id.home){
+           BottomNavigationView bottomNavigationView  = getActivity().findViewById(R.id.bottom_navigationid);
+            bottomNavigationView.setSelectedItemId(R.id.nav_landingPage);
+            getActivity().getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.fragment_container, new LandingPageFragment())
+                    .commit();
 
         }
 
@@ -183,6 +230,15 @@ public class ChatFragment extends Fragment {
     }
 
     public void changeLabelToChinese(){
+
+        bottomNavigationView.getMenu().getItem(0).setTitle("家园");
+        bottomNavigationView.getMenu().getItem(1).setTitle(getActivity().getResources().getString(R.string.tr_icon_news));
+        bottomNavigationView.getMenu().getItem(2).setTitle(getActivity().getResources().getString(R.string.tr_icon_chat));
+        bottomNavigationView.getMenu().getItem(3).setTitle(getActivity().getResources().getString(R.string.tr_icon_events));
+        bottomNavigationView.getMenu().getItem(4).setTitle(getActivity().getResources().getString(R.string.tr_icon_explore));
+
+
+        ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle("新闻");
         StringBuilder chineseIntro =  new StringBuilder("");
         chineseIntro.append("    朋友，你好！我是聊天机器人immigos。我可以回答一些基本问题以帮助您更好地学习澳大利亚文化以及探索澳大利亚！\n" +
                 "你可以通过以下方式询问我：\n");
@@ -202,6 +258,14 @@ public class ChatFragment extends Fragment {
     }
 
     public void changeLabelToEnglish(){
+        ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle("Chat");
+
+        bottomNavigationView.getMenu().getItem(0).setTitle("Home");
+        bottomNavigationView.getMenu().getItem(1).setTitle(getActivity().getResources().getString(R.string.icon_news));
+        bottomNavigationView.getMenu().getItem(2).setTitle(getActivity().getResources().getString(R.string.icon_chat));
+        bottomNavigationView.getMenu().getItem(3).setTitle(getActivity().getResources().getString(R.string.icon_events));
+        bottomNavigationView.getMenu().getItem(4).setTitle(getActivity().getResources().getString(R.string.icon_explore));
+
 
         StringBuilder englishIntro =  new StringBuilder("");
         englishIntro.append("    Hi there mate, I am Immigos chatbot. \n\nI can answer basic questions and will help you along to learn about Australian culture and explore Aussieland!\n" +
@@ -270,48 +334,6 @@ public class ChatFragment extends Fragment {
         aiRequest = new AIRequest();
 
     }
-
-
-    /*public String translateToEnglish(String message){
-
-        getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-
-
-                languageIdentifier.identifyLanguage(message).addOnSuccessListener(new OnSuccessListener<String>() {
-                    @Override
-                    public void onSuccess(String languageCode) {
-
-                        if (languageCode != "und" && languageCode.equals("zh")) {
-
-                            chineseEnglishTranslator.downloadModelIfNeeded(chineseToEnglishConditions).addOnSuccessListener(new OnSuccessListener<Void>() {
-                                @Override
-                                public void onSuccess(Void aVoid) {
-
-                                    chineseEnglishTranslator.translate(message).addOnSuccessListener(new OnSuccessListener<String>() {
-                                        @Override
-                                        public void onSuccess(String s) {
-                                            translatedText=s;
-                                        }
-                                    });
-
-                                }
-                            });
-                            //Log.i(TAG, "Language: " + languageCode);
-                            //Log.i(TAG, "Language: translated" + translatedText);
-
-                        } else {
-                            translatedText =message;
-                        }
-                    }
-                });
-
-            }
-        });
-
-                  return translatedText;
-    }*/
 
     private void fadeOutAndHideView(final MaterialCardView img)
     {

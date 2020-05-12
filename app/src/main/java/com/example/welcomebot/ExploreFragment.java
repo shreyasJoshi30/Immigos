@@ -2,6 +2,7 @@ package com.example.welcomebot;
 
 import android.Manifest;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -36,7 +37,10 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
@@ -58,6 +62,8 @@ import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.AppSettingsDialog;
 import pub.devrel.easypermissions.EasyPermissions;
 
+import static android.content.Context.MODE_PRIVATE;
+
 public class ExploreFragment extends Fragment implements EasyPermissions.PermissionCallbacks {
 
     MapView mMapView;
@@ -75,6 +81,10 @@ public class ExploreFragment extends Fragment implements EasyPermissions.Permiss
     FirebaseFirestore db;
     private FusedLocationProviderClient fusedLocationClient;
 
+    int postcode=0;
+    String category="";
+    BottomNavigationView bottomNavigationView;
+    String defaultLanguage = "NA";
 
 
 
@@ -86,10 +96,17 @@ public class ExploreFragment extends Fragment implements EasyPermissions.Permiss
 
         rootView = inflater.inflate(R.layout.fragment_explore, container, false);
         savedInstance = savedInstanceState;
+        bottomNavigationView  = getActivity().findViewById(R.id.bottom_navigationid);
         loadMap(rootView,savedInstance);
         setHasOptionsMenu(true);
         range = (SeekBar)rootView.findViewById(R.id.sb_range);
         tv_range = (TextView) rootView.findViewById(R.id.tv_range);
+        ((AppCompatActivity)getActivity()).getSupportActionBar().setHomeAsUpIndicator(null);
+
+        SharedPreferences pref = getActivity().getSharedPreferences("myPrefs",MODE_PRIVATE);
+        defaultLanguage =pref.getString("isChinese","au");
+        translateLabels();
+
 
 
         //__________ on click listeners for map categories________________
@@ -103,7 +120,7 @@ public class ExploreFragment extends Fragment implements EasyPermissions.Permiss
                 type = "Sport";
                  fetchData(type);
                 view.setVisibility(View.GONE);
-                Toast.makeText(getActivity(), "button clicked!", Toast.LENGTH_LONG).show();
+                //Toast.makeText(getActivity(), "button clicked!", Toast.LENGTH_LONG).show();
 
             }
         });
@@ -183,21 +200,46 @@ public class ExploreFragment extends Fragment implements EasyPermissions.Permiss
             }
         });
 
+        //___________________________________Bundle params_________________________________________
+
+
 
         return rootView;
 
     }
 
+    public void translateLabels(){
+        bottomNavigationView  = getActivity().findViewById(R.id.bottom_navigationid);
 
+        if(defaultLanguage.equals("cn")){
+            ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle(getActivity().getResources().getString(R.string.tr_icon_explore));
+
+            bottomNavigationView.getMenu().getItem(0).setTitle("家园");
+            bottomNavigationView.getMenu().getItem(1).setTitle(getActivity().getResources().getString(R.string.tr_icon_news));
+            bottomNavigationView.getMenu().getItem(2).setTitle(getActivity().getResources().getString(R.string.tr_icon_chat));
+            bottomNavigationView.getMenu().getItem(3).setTitle(getActivity().getResources().getString(R.string.tr_icon_events));
+            bottomNavigationView.getMenu().getItem(4).setTitle(getActivity().getResources().getString(R.string.tr_icon_explore));
+
+        }
+        else{
+            ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle("Explore");
+
+            bottomNavigationView.getMenu().getItem(0).setTitle("Home");
+            bottomNavigationView.getMenu().getItem(1).setTitle(getActivity().getResources().getString(R.string.icon_news));
+            bottomNavigationView.getMenu().getItem(2).setTitle(getActivity().getResources().getString(R.string.icon_chat));
+            bottomNavigationView.getMenu().getItem(3).setTitle(getActivity().getResources().getString(R.string.icon_events));
+            bottomNavigationView.getMenu().getItem(4).setTitle(getActivity().getResources().getString(R.string.icon_explore));
+        }
+    }
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
 
         inflater.inflate(R.menu.custom_toolbar, menu);
 
         MenuItem china  = menu.findItem(R.id.app_bar_China);
-        china.setVisible(false);
+        //china.setVisible(false);
         MenuItem aus  = menu.findItem(R.id.app_bar_australia);
-        aus.setVisible(false);
+        //aus.setVisible(false);
 
         super.onCreateOptionsMenu(menu, inflater);
 
@@ -207,13 +249,47 @@ public class ExploreFragment extends Fragment implements EasyPermissions.Permiss
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+
+
         int id = item.getItemId();
+
+        if(id == R.id.app_bar_China){
+
+            SharedPreferences pref = getActivity().getSharedPreferences("myPrefs",MODE_PRIVATE);
+            SharedPreferences.Editor editor = pref.edit();
+            editor.putString("isChinese","cn");
+            editor.commit();
+            defaultLanguage = "cn";
+            translateLabels();
+
+        }
+
+        if(id == R.id.app_bar_australia){
+
+            SharedPreferences pref = getActivity().getSharedPreferences("myPrefs",MODE_PRIVATE);
+            SharedPreferences.Editor editor = pref.edit();
+            editor.putString("isChinese","au");
+            editor.commit();
+            defaultLanguage = "au";
+           translateLabels();
+        }
+
         if(id == R.id.app_bar_search){
-            //What you want(Code Here)
             View view = getView().findViewById(R.id.filterCard);
             view.setVisibility(View.VISIBLE);
 
             return true;
+        }
+
+        if(id == android.R.id.home){
+            BottomNavigationView bottomNavigationView  = getActivity().findViewById(R.id.bottom_navigationid);
+            bottomNavigationView.setSelectedItemId(R.id.nav_landingPage);
+
+            getActivity().getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.fragment_container, new LandingPageFragment())
+                    .commit();
+
         }
 
         return super.onOptionsItemSelected(item);
@@ -261,6 +337,11 @@ public class ExploreFragment extends Fragment implements EasyPermissions.Permiss
                 // For zooming automatically to the location of the marker
                 CameraPosition cameraPosition = new CameraPosition.Builder().target(melbourne).zoom(12).build();
                 googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));*/
+
+
+
+
+
             }
         });
 
@@ -280,6 +361,13 @@ public class ExploreFragment extends Fragment implements EasyPermissions.Permiss
                         CameraPosition cameraPosition = new CameraPosition.Builder().target(currentLoc).zoom(12).build();
                         googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
 
+                        Bundle bundle = getArguments();
+
+                        if(bundle != null){
+                            postcode = bundle.getInt("postcode");
+                            category = bundle.getString("category");
+                            fetchData("Sport");
+                        }
 
                         //Toast.makeText(getContext(), "Current Location found", Toast.LENGTH_SHORT).show();
                     }
@@ -291,7 +379,9 @@ public class ExploreFragment extends Fragment implements EasyPermissions.Permiss
                        REQUEST_LOCATION_PERMISSION,perms);
             }
 
+
     }
+
 
 
     /**
@@ -364,11 +454,28 @@ public class ExploreFragment extends Fragment implements EasyPermissions.Permiss
             type="Market";
         }
 
-        db = FirebaseFirestore.getInstance();
         List<LocationBean> locationBeanList = new ArrayList<LocationBean>();
+        db = FirebaseFirestore.getInstance();
+        CollectionReference locationData = db.collection("locationData");
+
         //.orderBy("Type").limit(5)
-        db.collection("locationData").whereEqualTo("Classify",type)
-                .get()
+
+
+        if(String.valueOf(postcode).length()==4 && category.length()>0){
+            //locationData.whereEqualTo("Classify",type).whereEqualTo("Postcode",postcode).whereEqualTo("Type",category);
+            locationData.whereEqualTo("Postcode",String.valueOf(postcode)).whereEqualTo("Classify","Art");
+        }
+        else if(category.length()>0){
+            locationData.whereEqualTo("Classify",type).whereEqualTo("Type",category);
+        }
+        else if(String.valueOf(postcode).length()==4){
+            locationData.whereEqualTo("Classify",type).whereEqualTo("Postcode",postcode);
+        }
+        else{
+            locationData.whereEqualTo("Classify",type);
+        }
+
+        locationData.get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {

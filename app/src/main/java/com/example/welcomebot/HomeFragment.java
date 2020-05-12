@@ -1,6 +1,7 @@
 package com.example.welcomebot;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
@@ -19,10 +20,18 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 
 import com.bumptech.glide.Glide;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.card.MaterialCardView;
+import com.google.firebase.ml.common.modeldownload.FirebaseModelDownloadConditions;
+import com.google.firebase.ml.naturallanguage.FirebaseNaturalLanguage;
+import com.google.firebase.ml.naturallanguage.translate.FirebaseTranslateLanguage;
+import com.google.firebase.ml.naturallanguage.translate.FirebaseTranslator;
+import com.google.firebase.ml.naturallanguage.translate.FirebaseTranslatorOptions;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -31,6 +40,7 @@ import java.io.IOException;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
 import okhttp3.Call;
@@ -39,6 +49,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
+import static android.content.Context.MODE_PRIVATE;
 import static android.text.Layout.JUSTIFICATION_MODE_INTER_WORD;
 
 public class HomeFragment extends Fragment {
@@ -69,6 +80,18 @@ public class HomeFragment extends Fragment {
     Button btn_sports;
     Button btn_technology;
 
+    String defaultLanguage = "NA";
+
+    FirebaseTranslator englishChineseTranslator;
+    FirebaseModelDownloadConditions englishToChineseConditions;
+
+
+    String tr_title;
+    String tr_desc;
+    int cardlength = 0;
+    int currentCard = 0;
+    BottomNavigationView bottomNavigationView;
+
 
 
     @Nullable
@@ -80,11 +103,57 @@ public class HomeFragment extends Fragment {
         mContainer = container;
         rootView = inflater.inflate(R.layout.fragment_home,container,false);
         setHasOptionsMenu(true);
+        bottomNavigationView  = getActivity().findViewById(R.id.bottom_navigationid);
+
+
         eventBriteAPI_key = getActivity().getResources().getString(R.string.eventBriteAPI_key);
         newsAPIKey = getActivity().getResources().getString(R.string.newsAPI_key);
         layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
         cardParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-        getNews(country,newsCategory);
+
+        ((AppCompatActivity)getActivity()).getSupportActionBar().setHomeAsUpIndicator(null);
+
+        SharedPreferences pref = getActivity().getSharedPreferences("myPrefs",MODE_PRIVATE);
+        defaultLanguage =pref.getString("isChinese","au");
+
+
+        if(defaultLanguage.equals("cn")){
+            ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle("新闻");
+
+            enableBotttomNav(false);
+        }
+        else{
+            ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle("News");
+
+        }
+
+
+
+
+        getNews(defaultLanguage,country,newsCategory);
+
+
+        //---------------------english chinese translator-------------------
+
+        FirebaseTranslatorOptions englishToChineseOptions =
+                new FirebaseTranslatorOptions.Builder()
+                        .setSourceLanguage(FirebaseTranslateLanguage.EN)
+                        .setTargetLanguage(FirebaseTranslateLanguage.ZH)
+                        .build();
+        englishChineseTranslator =
+                FirebaseNaturalLanguage.getInstance().getTranslator(englishToChineseOptions);
+
+        englishToChineseConditions = new FirebaseModelDownloadConditions.Builder()
+                .build();
+
+        englishChineseTranslator.downloadModelIfNeeded(englishToChineseConditions).addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                //isAuCndownloaded  = true;
+             //   Toast.makeText(getContext(), "English-Chinese translator downloaded", Toast.LENGTH_LONG).show();
+            }
+        });
+        //---------------------english chinese translator-------------------
 
 
         //--------------------Button onclick listeners ---------------------------
@@ -95,7 +164,7 @@ public class HomeFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 homeLayout.removeAllViews();
-                getNews(country,"business");
+                getNews(defaultLanguage,country,"business");
             }
         });
 
@@ -105,7 +174,7 @@ public class HomeFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 homeLayout.removeAllViews();
-                getNews(country,"entertainment");
+                getNews(defaultLanguage,country,"entertainment");
             }
         });
 
@@ -115,7 +184,7 @@ public class HomeFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 homeLayout.removeAllViews();
-                getNews(country,"health");
+                getNews(defaultLanguage,country,"health");
             }
         });
 
@@ -124,7 +193,7 @@ public class HomeFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 homeLayout.removeAllViews();
-                getNews(country,"science");
+                getNews(defaultLanguage,country,"science");
             }
         });
         btn_sports = (Button) rootView.findViewById(R.id.btn_sports);
@@ -132,7 +201,7 @@ public class HomeFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 homeLayout.removeAllViews();
-                getNews(country,"sports");
+                getNews(defaultLanguage,country,"sports");
             }
         });
         btn_technology = (Button) rootView.findViewById(R.id.btn_technology);
@@ -140,13 +209,31 @@ public class HomeFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 homeLayout.removeAllViews();
-                getNews(country,"technology");
+                getNews(defaultLanguage,country,"technology");
             }
         });
 
 
+        if(defaultLanguage.equals("cn")){
 
-       return rootView;
+            changeLabelToChinese();
+        }else{
+            changeLabelToEnglish();
+        }
+
+
+
+        return rootView;
+    }
+
+    public void enableBotttomNav(Boolean value){
+
+        BottomNavigationView bottomNavigationView = (BottomNavigationView) getActivity().findViewById(R.id.bottom_navigationid);
+        bottomNavigationView.getMenu().getItem(0).setEnabled(value);
+        bottomNavigationView.getMenu().getItem(1).setEnabled(value);
+        bottomNavigationView.getMenu().getItem(2).setEnabled(value);
+        bottomNavigationView.getMenu().getItem(3).setEnabled(value);
+        bottomNavigationView.getMenu().getItem(4).setEnabled(value);
     }
 
 
@@ -170,19 +257,34 @@ public class HomeFragment extends Fragment {
         int id = item.getItemId();
 
         if(id == R.id.app_bar_China){
+
+            SharedPreferences pref = getActivity().getSharedPreferences("myPrefs",MODE_PRIVATE);
+            SharedPreferences.Editor editor = pref.edit();
+            editor.putString("isChinese","cn");
+            editor.commit();
+            defaultLanguage = "cn";
+
             homeLayout.removeAllViews();
-            country = "cn";
+            country = "au";
             newsCategory="";
             changeLabelToChinese();
-            getNews(country,newsCategory);
+            enableBotttomNav(false);
+            getNews(defaultLanguage,country,newsCategory);
         }
 
         if(id == R.id.app_bar_australia){
+
+            SharedPreferences pref = getActivity().getSharedPreferences("myPrefs",MODE_PRIVATE);
+            SharedPreferences.Editor editor = pref.edit();
+            editor.putString("isChinese","au");
+            editor.commit();
+            defaultLanguage = "au";
+
             country = "au";
             newsCategory="";
             homeLayout.removeAllViews();
             changeLabelToEnglish();
-            getNews(country,newsCategory);
+            getNews(defaultLanguage,country,newsCategory);
         }
 
         if(id == R.id.app_bar_about){
@@ -190,6 +292,16 @@ public class HomeFragment extends Fragment {
             Intent intent = new Intent(getActivity(), AboutActivity.class);
             intent.putExtra("SCREEN", "about");
             startActivity(intent);
+
+        }
+
+        if(id == android.R.id.home){
+            BottomNavigationView bottomNavigationView  = getActivity().findViewById(R.id.bottom_navigationid);
+            bottomNavigationView.setSelectedItemId(R.id.nav_landingPage);
+            getActivity().getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.fragment_container, new LandingPageFragment())
+                    .commit();
 
         }
 
@@ -208,6 +320,14 @@ public class HomeFragment extends Fragment {
         btn_science.setText("科学");
         btn_sports.setText("体育");
         btn_technology.setText("技术");
+        ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle("新闻");
+
+        bottomNavigationView.getMenu().getItem(0).setTitle("家园");
+        bottomNavigationView.getMenu().getItem(1).setTitle(getActivity().getResources().getString(R.string.tr_icon_news));
+        bottomNavigationView.getMenu().getItem(2).setTitle(getActivity().getResources().getString(R.string.tr_icon_chat));
+        bottomNavigationView.getMenu().getItem(3).setTitle(getActivity().getResources().getString(R.string.tr_icon_events));
+        bottomNavigationView.getMenu().getItem(4).setTitle(getActivity().getResources().getString(R.string.tr_icon_explore));
+
 
 
     }
@@ -219,6 +339,14 @@ public class HomeFragment extends Fragment {
         btn_science.setText("Science");
         btn_sports.setText("Sports");
         btn_technology.setText("Technology");
+        ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle("News");
+
+        bottomNavigationView.getMenu().getItem(0).setTitle("Home");
+        bottomNavigationView.getMenu().getItem(1).setTitle(getActivity().getResources().getString(R.string.icon_news));
+        bottomNavigationView.getMenu().getItem(2).setTitle(getActivity().getResources().getString(R.string.icon_chat));
+        bottomNavigationView.getMenu().getItem(3).setTitle(getActivity().getResources().getString(R.string.icon_events));
+        bottomNavigationView.getMenu().getItem(4).setTitle(getActivity().getResources().getString(R.string.icon_explore));
+
 
     }
 
@@ -263,8 +391,10 @@ public class HomeFragment extends Fragment {
      * @param country
      * @param newsCategory
      */
-    public void getNews(String country, String newsCategory){
+    public void getNews(String newsLanguage,String country, String newsCategory){
 
+
+        enableBotttomNav(false);
         OkHttpClient client = new OkHttpClient().newBuilder()
                 .build();
 
@@ -309,11 +439,12 @@ public class HomeFragment extends Fragment {
                             containerCardLayout.setLayoutParams(scrollParams);
                             containerCardLayout.setOrientation(LinearLayout.VERTICAL);
                             scrollView.addView(containerCardLayout);
-
+                            cardlength = Jarray.length();
                             for (int i = 0; i < Jarray.length(); i++) {
+                                currentCard = i+1;
                                 JSONObject object = Jarray.getJSONObject(i);
 
-                                String title  = object.getString("title");
+                                String title = object.getString("title");
                                 String desc = object.getString("description");
                                 String imageurl = object.getString("urlToImage");
                                 String content = object.getString("content");
@@ -322,11 +453,38 @@ public class HomeFragment extends Fragment {
 
                                 //create multiple cards....
 
-                                layoutParams.setMargins(30,30,30,30);
+                                layoutParams.setMargins(30, 30, 30, 30);
 
-                                MaterialCardView cardView = createCard(title,desc,content,newsUrl,imageurl);
+                                if (defaultLanguage.equals("au")) {
 
-                                containerCardLayout.addView(cardView,layoutParams);
+                                    MaterialCardView cardView = createCard(title, desc, content, newsUrl, imageurl);
+                                    containerCardLayout.addView(cardView, layoutParams);
+                                }
+                                else{
+
+                                    englishChineseTranslator.translate(title).addOnSuccessListener(new OnSuccessListener<String>() {
+                                        @Override
+                                        public void onSuccess(String sr) {
+
+                                            //tr_title = sr;
+
+                                            englishChineseTranslator.translate(desc).addOnSuccessListener(new OnSuccessListener<String>() {
+                                                @Override
+                                                public void onSuccess(String s) {
+
+                                                    tr_title = sr;
+                                                    tr_desc = s;
+                                                    MaterialCardView cardView = createCard(tr_title, tr_desc, content, newsUrl, imageurl);
+                                                    containerCardLayout.addView(cardView, layoutParams);
+                                                }
+                                            });
+
+                                        }
+                                    });
+
+
+
+                                }
 
                             }
 
@@ -339,6 +497,7 @@ public class HomeFragment extends Fragment {
 
             }
         });
+
 
 
     }
@@ -354,6 +513,8 @@ public class HomeFragment extends Fragment {
      * @return
      */
     public MaterialCardView  createCard(String title, String desc, String content, String newsUrl, String imageurl){
+
+
 
         LinearLayout cardLayout = new LinearLayout(getActivity());
         cardLayout.setOrientation(LinearLayout.VERTICAL);
@@ -427,6 +588,13 @@ public class HomeFragment extends Fragment {
         cardLayout.addView(tv);
         cardLayout.addView(tvContent);
         cardView.addView(cardLayout);
+
+        if(currentCard == cardlength){
+
+            System.out.println(currentCard);
+            enableBotttomNav(true);
+        }
+
         return cardView;
 
     }

@@ -17,20 +17,21 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-
         </activity>
         <activity
             android:name=".SplashScreenActivity"
             android:label="@string/title_activity_splash_screen"
             android:logo="@mipmap/launcher_icon"
             android:theme="@style/SplashScreenTheme">
-            <!--<intent-filter>
+
+            <!--
+            <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>-->
+            </intent-filter>
+            -->
         </activity>
-
         <activity android:name=".MainActivity">
 
             <!--
@@ -42,6 +43,7 @@
             -->
 
         </activity>
+
         <meta-data
             android:name="com.google.android.maps.v2.API_KEY"
             android:value="@string/googleMaps_key" />
@@ -49,13 +51,12 @@
         <uses-library
             android:name="org.apache.http.legacy"
             android:required="false" />
-
         <uses-library android:name="com.google.android.maps" />
     </application>
-    <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-
     <uses-permission android:name="android.permission.INTERNET" />
+
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
 
 </manifest>

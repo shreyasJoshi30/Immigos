@@ -13,8 +13,15 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.tabs.TabLayout;
+import com.google.firebase.ml.common.modeldownload.FirebaseModelDownloadConditions;
+import com.google.firebase.ml.naturallanguage.FirebaseNaturalLanguage;
+import com.google.firebase.ml.naturallanguage.translate.FirebaseTranslateLanguage;
+import com.google.firebase.ml.naturallanguage.translate.FirebaseTranslator;
+import com.google.firebase.ml.naturallanguage.translate.FirebaseTranslatorOptions;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,9 +38,35 @@ public class AboutActivity extends AppCompatActivity {
     Animation btnAnim ;
     TextView tvSkip;
 
+    FirebaseTranslator englishChineseTranslator;
+    FirebaseModelDownloadConditions englishToChineseConditions;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+
+        //---------------------english chinese translator-------------------
+
+        FirebaseTranslatorOptions englishToChineseOptions =
+                new FirebaseTranslatorOptions.Builder()
+                        .setSourceLanguage(FirebaseTranslateLanguage.EN)
+                        .setTargetLanguage(FirebaseTranslateLanguage.ZH)
+                        .build();
+        englishChineseTranslator =
+                FirebaseNaturalLanguage.getInstance().getTranslator(englishToChineseOptions);
+
+        englishToChineseConditions = new FirebaseModelDownloadConditions.Builder()
+                .build();
+
+        englishChineseTranslator.downloadModelIfNeeded(englishToChineseConditions).addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                //isAuCndownloaded  = true;
+                //Toast.makeText(getApplicationContext(), "English-Chinese translator downloaded", Toast.LENGTH_LONG).show();
+            }
+        });
+        //---------------------english chinese translator-------------------
 
 
         // make the activity on full screen
@@ -68,10 +101,10 @@ public class AboutActivity extends AppCompatActivity {
         // fill list screen
 
         final List<ScreenItem> mList = new ArrayList<>();
-        mList.add(new ScreenItem("News Feed","Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua, consectetur  consectetur adipiscing elit",R.drawable.img_news_app));
-        mList.add(new ScreenItem("Talk With us  ","Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua, consectetur  consectetur adipiscing elit",R.drawable.img_bot_app));
-        mList.add(new ScreenItem("Whats New?","Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua, consectetur  consectetur adipiscing elit",R.drawable.img2));
-        mList.add(new ScreenItem("Explore Around!","Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua, consectetur  consectetur adipiscing elit",R.drawable.img3));
+        mList.add(new ScreenItem("News Feed","Stay updated with the local Australian news to know whats happening around.",R.drawable.img_news_app));
+        mList.add(new ScreenItem("Talk With us  ","Try engaging with our chatbot which will help you in answering basic questions and indulge in short conversations.",R.drawable.img_bot_app));
+        mList.add(new ScreenItem("Whats New?","Explore the latest events happening around Australia to understand its culture",R.drawable.img2));
+        mList.add(new ScreenItem("Explore Around!","Explore your local surroundings to find interesting places and attractions ",R.drawable.img3));
 
         // setup viewpager
         screenPager =findViewById(R.id.screen_viewpager);
@@ -196,6 +229,7 @@ public class AboutActivity extends AppCompatActivity {
         SharedPreferences pref = getApplicationContext().getSharedPreferences("myPrefs",MODE_PRIVATE);
         SharedPreferences.Editor editor = pref.edit();
         editor.putBoolean("isIntroOpnend",true);
+        editor.putString("isChinese","au");
         editor.commit();
 
 
