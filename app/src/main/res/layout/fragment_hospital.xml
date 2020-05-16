@@ -13,22 +13,22 @@
         android:id="@+id/tabLayout">
 
         <com.google.android.material.tabs.TabItem
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/tab_1"
-            android:text="Centers" />
+            android:text="Hospital" />
 
         <com.google.android.material.tabs.TabItem
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/tab_2"
             android:text="Doctors" />
 
         <com.google.android.material.tabs.TabItem
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/tab_3"
-            android:text="Hospitals" />
+            android:text="Chinese Medicine" />
     </com.google.android.material.tabs.TabLayout>
     
     <androidx.viewpager.widget.ViewPager

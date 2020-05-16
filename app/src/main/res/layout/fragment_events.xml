@@ -16,11 +16,31 @@
         app:cardCornerRadius="3dp"
         android:elevation="9dp">
 
+        <LinearLayout
+            android:weightSum="8"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
     <EditText
-        android:layout_height="wrap_content"
-        android:layout_width="match_parent"
+        android:id="@+id/et_search_query"
+        android:layout_height="match_parent"
+        android:layout_weight="7"
+        android:layout_width="wrap_content"
         android:drawableLeft="@drawable/ic_search_grey_24dp"
         android:inputType="text"/>
+
+            <Button
+                android:layout_margin="4dp"
+                android:layout_weight="1"
+                android:id="@+id/btn_event_search"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:textAllCaps="false"
+                android:background="@drawable/btn_selector"
+                android:text="Search"/>
+
+        </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
 
 

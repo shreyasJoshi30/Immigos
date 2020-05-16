@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
+import android.speech.RecognizerIntent;
 import android.speech.tts.TextToSpeech;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
@@ -42,6 +43,7 @@ import com.google.firebase.ml.naturallanguage.translate.FirebaseTranslateLanguag
 import com.google.firebase.ml.naturallanguage.translate.FirebaseTranslator;
 import com.google.firebase.ml.naturallanguage.translate.FirebaseTranslatorOptions;
 
+import java.util.ArrayList;
 import java.util.Locale;
 import java.util.UUID;
 
@@ -59,11 +61,13 @@ import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Observer;
 
+import static android.app.Activity.RESULT_OK;
 import static android.content.Context.MODE_PRIVATE;
 
 public class ChatFragment extends Fragment {
 
 
+    private static final int REQUEST_CODE_SPEECH_INPUT =1000 ;
     private String uuid = UUID.randomUUID().toString();
     private TextToSpeech mtts;
     private AIRequest aiRequest;
@@ -94,15 +98,18 @@ public class ChatFragment extends Fragment {
     FrameLayout layout;
 
     BottomNavigationView bottomNavigationView;
+    ImageView record_message;
+
 
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 
-        setHasOptionsMenu(true);
 
-        rootview = inflater.inflate(R.layout.fragment_chat,container,false);;
+
+        rootview = inflater.inflate(R.layout.fragment_chat,container,false);
+        setHasOptionsMenu(true);
          introCardView = (MaterialCardView) rootview.findViewById(R.id.introCard);
          tv_chatIntro = (TextView) rootview.findViewById(R.id.tv_chatIntro);
          tv_chatQuestions =(TextView) rootview.findViewById(R.id.tv_chatQuestions);
@@ -297,13 +304,15 @@ public class ChatFragment extends Fragment {
         ImageView sendBtn =(ImageView) getView().findViewById(R.id.sendBtn);
         //sendBtn.setClickable(true);
 
+        record_message  = (ImageView) getView().findViewById(R.id.record_message);
+
         queryEditText = getView().findViewById(R.id.queryEditText);
         queryEditText.setOnKeyListener((v, keyCode, event) -> {
             if (event.getAction() == KeyEvent.ACTION_DOWN) {
                 switch (keyCode) {
                     case KeyEvent.KEYCODE_DPAD_CENTER:
                     case KeyEvent.KEYCODE_ENTER:
-                        sendMessage(sendBtn);
+                        sendMessage();
                         return true;
                     default:
                         break;
@@ -318,12 +327,51 @@ public class ChatFragment extends Fragment {
         sendBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                sendMessage(sendBtn);
+                sendMessage();
             }
         });
 
+        record_message.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
 
-        // or  (ImageView) view.findViewById(R.id.foo);
+                Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+                intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+                intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE,Locale.getDefault());
+                intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, "zh");
+                intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, "zh");
+                intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, "zh");
+                intent.putExtra(RecognizerIntent.EXTRA_SUPPORTED_LANGUAGES, "zh");
+                intent.putExtra(RecognizerIntent.EXTRA_ONLY_RETURN_LANGUAGE_PREFERENCE,"zh");
+                intent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, "zh");
+                intent.putExtra(RecognizerIntent.EXTRA_RESULTS, "zh");
+                intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Hi! Record your message");
+
+                try{
+
+                    startActivityForResult(intent,REQUEST_CODE_SPEECH_INPUT);
+                }catch (Exception e){
+                    e.printStackTrace();
+                    Toast.makeText(getActivity(),e.getMessage(),Toast.LENGTH_SHORT ).show();
+                };
+            }
+        });
+    }
+
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        switch (requestCode){
+            case REQUEST_CODE_SPEECH_INPUT:
+                if(resultCode == RESULT_OK && null!=data){
+                    ArrayList<String> result = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
+                    queryEditText.setText(result.get(0));
+                    sendMessage();
+                }
+                break;
+
+
+        }
     }
 
     private void initChatbot(){
@@ -357,9 +405,9 @@ public class ChatFragment extends Fragment {
     /**
      * sendMessage is used to send the query to dialogfow and make an async request to get bot's response
      * The method alsp checks whether the input is in english or chinese and translates accordingly.
-     * @param view
+     *
      */
-    public void sendMessage(View view) {
+    public void sendMessage() {
 
         String msg = queryEditText.getText().toString();
         //String response = translateToEnglish(msg);

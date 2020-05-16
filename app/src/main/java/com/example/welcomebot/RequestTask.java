@@ -20,7 +20,9 @@ public class RequestTask extends AsyncTask<AIRequest, Void, AIResponse> {
 
     Activity activity;
     private ChatFragment chatFragment;
+    private TranslateFragment translateFragment;
     static final String BROADCAST_ACTION = "CALL_FUNCTION";
+    String callingClass = "NA";
 
 
     Fragment fragment;
@@ -33,13 +35,27 @@ public class RequestTask extends AsyncTask<AIRequest, Void, AIResponse> {
         this.activity = activity;
         this.aiDataService = aiDataService;
         this.customAIServiceContext = customAIServiceContext;
+        this.callingClass = "chat";
+    }
+
+    RequestTask(TranslateFragment translateFragment,Activity activity, AIDataService aiDataService, AIServiceContext customAIServiceContext){
+        this.translateFragment = translateFragment;
+        this.activity = activity;
+        this.aiDataService = aiDataService;
+        this.customAIServiceContext = customAIServiceContext;
+        this.callingClass = "translate";
     }
 
     @Override
     protected AIResponse doInBackground(AIRequest... aiRequests) {
         final AIRequest request = aiRequests[0];
         try {
-            return aiDataService.request(request, customAIServiceContext);
+            if(this.callingClass.equals("chat")){
+                return aiDataService.request(request, customAIServiceContext);
+            }else{
+                return null;
+            }
+
         } catch (AIServiceException e) {
             e.printStackTrace();
         }
@@ -50,7 +66,14 @@ public class RequestTask extends AsyncTask<AIRequest, Void, AIResponse> {
     protected void onPostExecute(AIResponse aiResponse) {
         //((MainActivity)activity).callback(aiResponse);
         //((ChatFragment)fragment).callback(aiResponse);
-        chatFragment.callback(aiResponse);
+        if(this.callingClass.equals("chat")){
+            chatFragment.callback(aiResponse);
+        }
+        else{
+            translateFragment.callback();
+
+        }
+
 
 
 

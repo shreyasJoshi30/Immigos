@@ -461,18 +461,21 @@ public class ExploreFragment extends Fragment implements EasyPermissions.Permiss
         //.orderBy("Type").limit(5)
 
 
+
         if(String.valueOf(postcode).length()==4 && category.length()>0){
             //locationData.whereEqualTo("Classify",type).whereEqualTo("Postcode",postcode).whereEqualTo("Type",category);
-            locationData.whereEqualTo("Postcode",String.valueOf(postcode)).whereEqualTo("Classify","Art");
+//            locationData.whereEqualTo("Postcode",String.valueOf(postcode)).whereEqualTo("Classify","Art");
+            locationData.whereEqualTo("Classify","art");//.whereEqualTo("Type",category);
+
         }
         else if(category.length()>0){
-            locationData.whereEqualTo("Classify",type).whereEqualTo("Type",category);
+            locationData.whereEqualTo("Classify","art");//.whereEqualTo("Type",category);
         }
         else if(String.valueOf(postcode).length()==4){
-            locationData.whereEqualTo("Classify",type).whereEqualTo("Postcode",postcode);
+            locationData.whereEqualTo("Classify","art");//.whereEqualTo("Postcode",postcode);
         }
         else{
-            locationData.whereEqualTo("Classify",type);
+            locationData.whereEqualTo("Classify","art");
         }
 
         locationData.get()

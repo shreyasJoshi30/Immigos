@@ -16,13 +16,13 @@ public class PageAdapter extends FragmentPagerAdapter {
     public Fragment getItem(int position) {
         switch (position){
             case 0:
-                return new ExerciseFragment();
+                return new HospitalListFragment();
             case 1:
-                return new ExerciseFragment();
+                return new DoctorListFragment();
             case 2:
-                return new ExerciseFragment();
+                return new ChineseMedical();
             default:
-                return  new ExerciseFragment();
+                return  new DoctorListFragment();
         }
     }
 

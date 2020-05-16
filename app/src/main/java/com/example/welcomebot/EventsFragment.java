@@ -1,13 +1,18 @@
 package com.example.welcomebot;
 
+import android.Manifest;
+import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.provider.CalendarContract;
 import android.speech.tts.TextToSpeech;
 import android.util.TypedValue;
 import android.view.Gravity;
@@ -17,6 +22,8 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
@@ -38,12 +45,16 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Observer;
@@ -80,6 +91,8 @@ public class EventsFragment extends Fragment {
     String tr_endTime;
     String tr_address;
     BottomNavigationView bottomNavigationView;
+    EditText et_search_query;
+    Button btn_event_search;
 
 
 
@@ -105,6 +118,8 @@ public class EventsFragment extends Fragment {
 
         searchEventFilter = rootivew.findViewById(R.id.searchEventFilter);
         //searchEventFilter.setContentPadding(30, 30, 30, 30);
+        et_search_query = rootivew.findViewById(R.id.et_search_query);
+        btn_event_search = rootivew.findViewById(R.id.btn_event_search);
 
         SharedPreferences pref = getActivity().getSharedPreferences("myPrefs",MODE_PRIVATE);
         defaultLanguage =pref.getString("isChinese","au");
@@ -132,6 +147,22 @@ public class EventsFragment extends Fragment {
         });
         //---------------------english chinese translator-------------------
 
+        btn_event_search.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (et_search_query.getText().toString().length() >0){
+                    try {
+                        containerCardLayout.removeAllViews();
+                        getEvents();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+                else{
+                    Toast.makeText(getActivity(),"Please enter the text to be searched",Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
 
         try {
             getEvents();
@@ -152,6 +183,8 @@ public class EventsFragment extends Fragment {
             bottomNavigationView.getMenu().getItem(2).setTitle(getActivity().getResources().getString(R.string.tr_icon_chat));
             bottomNavigationView.getMenu().getItem(3).setTitle(getActivity().getResources().getString(R.string.tr_icon_events));
             bottomNavigationView.getMenu().getItem(4).setTitle(getActivity().getResources().getString(R.string.tr_icon_explore));
+            btn_event_search.setText(getActivity().getResources().getString(R.string.tr_search));
+            et_search_query.setHint(getActivity().getResources().getString(R.string.tr_event_hints));
 
         }
         else{
@@ -162,6 +195,8 @@ public class EventsFragment extends Fragment {
             bottomNavigationView.getMenu().getItem(2).setTitle(getActivity().getResources().getString(R.string.icon_chat));
             bottomNavigationView.getMenu().getItem(3).setTitle(getActivity().getResources().getString(R.string.icon_events));
             bottomNavigationView.getMenu().getItem(4).setTitle(getActivity().getResources().getString(R.string.icon_explore));
+            btn_event_search.setText(getActivity().getResources().getString(R.string.search));
+            et_search_query.setHint(getActivity().getResources().getString(R.string.event_hints));
         }
     }
 
@@ -240,12 +275,12 @@ public class EventsFragment extends Fragment {
                 .build();
 
         StringBuilder requestURL = new StringBuilder("http://api.eventfinda.com.au/v2/events.json?");
-        requestURL.append("fields=event:(url,name,description,sessions,point,datetime_start,datetime_end,address,images),session:(timezone,datetime_start)");
+        requestURL.append("fields=event:(url,name,description,sessions,point,datetime_start,datetime_end,address,images,category),session:(timezone,datetime_start)");
         requestURL.append("&order=date&row=20&location=4");
 
-        /*if(!searchString.getText().toString().equals("")){
-            requestURL.append("&q="+searchString);
-        }*/
+        if(et_search_query.getText().toString().length()>0){
+            requestURL.append("&q="+et_search_query.getText().toString());
+        }
 
         Request request = new Request.Builder()
                 .url(requestURL.toString())
@@ -285,7 +320,9 @@ public class EventsFragment extends Fragment {
                                 String startTime = object.getString("datetime_start");
                                 String endTime = object.getString("datetime_end");
                                 String address = object.getString("address");
-                                //final String imageUrl;
+                                //String price = object.getJSONObject("sessions").getJSONArray("sessions").getJSONObject(0).getJSONObject("session_tickets").getJSONArray("session_tickets").getJSONObject(0).getString("price");
+                                String price="FREE";//final String imageUrl;
+                                String category = object.getJSONObject("category").getString("name");
                                 JSONArray imageArray = object.getJSONObject("images").getJSONArray("images").getJSONObject(0).getJSONObject("transforms").getJSONArray("transforms");
 
 
@@ -441,11 +478,31 @@ public class EventsFragment extends Fragment {
             //tvContent.setJustificationMode(JUSTIFICATION_MODE_INTER_WORD);
         }
 
+        //display price of events
+
+        /*LinearLayout priceHolderLayout = new LinearLayout(getActivity());
+
+        cardLayout.setOrientation(LinearLayout.HORIZONTAL);
+        LinearLayout.LayoutParams priceHolderParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT
+                ,LinearLayout.LayoutParams.WRAP_CONTENT);
+        priceHolderLayout.setLayoutParams(priceHolderParams);
+*/
+        /*TextView tv_price = new TextView(getActivity());
+        tv_price.setLayoutParams(layoutParams);
+        tv_price.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
+        tv_price.setTextColor(Color.BLACK);
+        tv_price.setText(category);
+        tv_price.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_location_on_blue_24dp, 0, 0, 0);
+        //priceHolderLayout.addView(tv_price);*/
+
+
+
         TextView eventDate = new TextView(getActivity());
         eventDate.setLayoutParams(layoutParams);
         eventDate.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
         eventDate.setTextColor(Color.BLACK);
-        eventDate.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_date_range_black_24dp, 0, 0, 0);
+        eventDate.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_date_range_black_24dp, 0, R.drawable.ic_add_alert_blue_24dp, 0);
+
         String datePart_startTime = startTime.split(" ")[0];
         String datePart_endTime = endTime.split(" ")[0];
 
@@ -486,7 +543,70 @@ public class EventsFragment extends Fragment {
         eventAddress.setText(" "+address);
         eventAddress.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_location_on_blue_24dp, 0, 0, 0);
 
+        eventDate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
 
+                //this code is for setting event time in calendar
+                SimpleDateFormat millisecParse = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                Date date1 = null;
+                Date date2 = null;
+                try {
+                    date1 = millisecParse.parse(startTime);
+                    date2 = millisecParse.parse(endTime);
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+
+                if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.WRITE_CALENDAR)
+                        != PackageManager.PERMISSION_GRANTED
+                && ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.READ_CALENDAR) != PackageManager.PERMISSION_GRANTED) {
+                    // Permission is not granted
+                    // Ask for permision
+                    ActivityCompat.requestPermissions(getActivity(),new String[] { Manifest.permission.WRITE_CALENDAR,Manifest.permission.READ_CALENDAR}, 35);
+                }
+                else {
+                    addReminder(eventName,eventDesc, date1.getTime(),date2.getTime(),address);
+                }
+
+
+
+
+           /*     Calendar cal = Calendar.getInstance();
+                Intent intent = new Intent(Intent.ACTION_EDIT);
+                intent.setType("vnd.android.cursor.item/event");
+                intent.putExtra("beginTime", date1.getTime());
+                intent.putExtra("allDay", false);
+                //intent.putExtra("rrule", "FREQ=YEARLY");
+                intent.putExtra("endTime", date2.getTime());
+                intent.putExtra("title", "Event - "+ eventName);
+
+                //intent.putExtra(CalendarContract.Events.EVENT_COLOR,CalendarContract.Events.);
+                intent.putExtra(CalendarContract.Events.EVENT_COLOR, 0xffff0000);
+                intent.putExtra(CalendarContract.Events.EVENT_LOCATION,address);
+                intent.putExtra(CalendarContract.Events.DESCRIPTION,eventDesc);
+                intent.putExtra(CalendarContract.Events.HAS_ALARM,true);
+
+
+
+                startActivity(intent);*/
+
+
+                /*Calendar cal = Calendar.getInstance();
+                ContentResolver cr = getActivity().getContentResolver();
+                ContentValues values = new ContentValues();
+                values.put(CalendarContract.Events.DTSTART, cal.getTimeInMillis());
+                values.put(CalendarContract.Events.DTEND, cal.getTimeInMillis()+60*60*1000);
+                values.put(CalendarContract.Events.TITLE, eventName);
+                values.put(CalendarContract.Events.EVENT_COLOR, 0xffff0000);
+                values.put(CalendarContract.Events.CALENDAR_ID, 1);
+                values.put(CalendarContract.Events.EVENT_TIMEZONE, "UTC");
+                Uri uri = cr.insert(CalendarContract.Events.CONTENT_URI, values);*/
+
+
+
+            }
+        });
 
 
         cardView.setOnClickListener(new View.OnClickListener() {
@@ -495,6 +615,7 @@ public class EventsFragment extends Fragment {
                 Uri uriUrl = Uri.parse(eventUrl);
                 Intent launchBrowser = new Intent(Intent.ACTION_VIEW, uriUrl);
                 startActivity(launchBrowser);
+
             }
         });
 
@@ -503,10 +624,12 @@ public class EventsFragment extends Fragment {
         //scrollView.addView(cardLayout);
         cardLayout.addView(eventTitle);
         cardLayout.addView(tv);
+
         cardLayout.addView(eventDate);
         cardLayout.addView(timings);
         cardLayout.addView(eventAddress);
         cardLayout.addView(tvContent);
+        //cardView.addView(tv_price);
         cardView.addView(cardLayout);
 
       /* m_eventName.observe(getActivity(), new Observer<String>() {
@@ -519,4 +642,46 @@ public class EventsFragment extends Fragment {
 
         return cardView;
     }
+
+
+    private void addReminder(String eventName,String eventDesc, Long eventStartTime, Long eventEndTime, String address) {
+
+
+        ContentResolver cr=getActivity().getContentResolver();
+        Calendar endTime=Calendar.getInstance();
+
+
+        ContentValues calEvent = new ContentValues();
+        calEvent.put(CalendarContract.Events.CALENDAR_ID, 1); // XXX pick)
+        calEvent.put(CalendarContract.Events.TITLE, eventName);
+        calEvent.put(CalendarContract.Events.DESCRIPTION,eventDesc);
+        calEvent.put(CalendarContract.Events.DTSTART, eventStartTime);
+        calEvent.put(CalendarContract.Events.DTEND, eventEndTime);
+        calEvent.put(CalendarContract.Events.HAS_ALARM, 1);
+        calEvent.put(CalendarContract.Events.EVENT_LOCATION,address);
+
+        calEvent.put(CalendarContract.Events.ALL_DAY, false);
+
+        calEvent.put(CalendarContract.Events.EVENT_TIMEZONE, CalendarContract.Calendars.CALENDAR_TIME_ZONE);
+        Uri uri =cr.insert(CalendarContract.Events.CONTENT_URI, calEvent);
+
+        // The returned Uri contains the content-retriever URI for
+        // the newly-inserted event, including its id
+        int id = Integer.parseInt(uri.getLastPathSegment());
+        //Toast.makeText(getActivity(), "Created Calendar Event " + id,Toast.LENGTH_SHORT).show();
+
+        // String reminderUriString = "content://com.android.calendar/reminders";
+
+        ContentValues reminders = new ContentValues();
+        reminders.put(CalendarContract.Reminders.EVENT_ID,id);
+        reminders.put(CalendarContract.Reminders.METHOD, CalendarContract.Reminders.METHOD_ALERT);
+        reminders.put(CalendarContract.Reminders.MINUTES, 60);
+
+        Uri uri2 = cr.insert(CalendarContract.Reminders.CONTENT_URI, reminders);
+
+
+
+        Toast.makeText(getActivity(), "Event has been added to your calendar successfully", Toast.LENGTH_SHORT).show();
+    }          // Toast.makeText(activity, "Reminder have been saved succes fully", Toast.LENGTH_SHORT).show();
+
 }

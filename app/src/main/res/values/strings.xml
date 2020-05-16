@@ -1,0 +1,97 @@
+<resources>
+    <string name="app_name">Immigos</string>
+    <string name="title_activity_splash_screen">Immigos</string>
+
+    <!--    <string name="dialogflow_key">key</string>
+    <string name="newsAPI_key">key</string>
+    <string name="eventBriteAPI_key">key</string>
+    <string name="googleMaps_key">key</string>-->
+
+    <string name="dialogflow_key">mykey</string>
+    <string name="newsAPI_key">mykey</string>
+    <string name="eventBriteAPI_key">mykey</string>
+    <string name="googleMaps_key">mykey</string>
+    <string name="placesAPI_key">mykey</string>
+
+
+    <!-- TODO: Remove or change this placeholder text -->
+
+    <string name="mentalHealth">\nEmotional and mental health are important since your actions and the way of how you live are greatly influenced by your mental status, emotions and behaviors.A mentally and emotionally stable and healthy mind can bring positive influences to your life, allowing you to adapt changes in your life. \n\nMental health is especially important for senior Chinese immigrants, in this case, you. Having a major part of your life changed, difficulties such as language barrier,social isolation due to lack of social connections, we understand this could be a difficult time for you. However, when this happens, never leave yourself in despair and isolation, we are here to help, take these advice and we are sure that you will be more mentally healthy and happy. \n\n<font size="20">How do I know if I am experiencing mental problems?</font>
+
+    </string>
+
+    <string name="mentalProblems">Some most common mental conditions with its symptoms are:\n\n<b>• Anxiety: </b>some of the most common signs that you might have an anxiety disorder are constant worries, racing heartbeat, thoughts or behaviors that you feel you cannot control.\n\n<b>• Psychosis: </b>this is when the person is confused between what is real and what is not. People might have false beliefs that are not common for their culture. Some early signs of psychosis are wanting to be alone all or most of the time, not able to sleep, less expression of emotions, neglected personal hygiene etc.\n\n<b>• Schizophrenia: </b> it disturbs the life of the person and the people around them. Some of the signs of schizophrenia are: believing things that are not true (delusions), seeing or hearing things that others do not see or hear, feeling agitated, having confused speech.\n\n<b>• Depression: </b>Feelings of helplessness and/or hopelessness, loss of interest in daily activities, appetite or weight changes, concentration problems.\n\n<b>Call Beyondblue: 1300 22 4636</b><b>General Practitioner(GP). \n\n</b>\n\n If you are concerned about your mental health and wellbeing, the first place to go to is your doctor, also known as <font size="20">What you need to do and where to find help?\n\n</font> In Australia some GPs have special training in mental health care. you can call  and ask for a doctor in your local area.\n\nPeople who are entitled to Medicare can usually pay a small amount to see a GP, and in some cases nothing (this is called ‘>bulk billing’).
+
+
+
+
+    </string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="storeDesc">No matter where you\'re living\, whether its a suburb or city, you\'re going to need some spices and houseold items which can only be found in home country stores.\n\nThe best place to start is your local supermarket. Australia is filled with fresh local markets which are spread widely across different suburbs. The main supermarket chains here are Woolworths, Coles IGA and Aldi. \n\nAdditionally, you can find a handful of asian stores in each suburb to grab the local groceries.
+    </string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="exerciseDesc">Physical activity or exercise can improve your health and reduce the risk of developing several diseases like type 2 diabetes, cancer and cardiovascular disease. Physical activity and exercise can have immediate and long-term health benefits. Most importantly, regular activity can improve your quality of life.\n\nExercise is known to be an all-natural treatment to fight depression. According to scientists, frequent exercising and sports activities supports nerve cell growth in the hippocampus, improving nerve cell connections, which helps relieve depression.
+    </string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
+
+    <!--dashboard icons-->
+    <string name="icon_news">News</string>
+    <string name="icon_events">Events</string>
+    <string name="icon_exercise">Exercise</string>
+    <string name="icon_hospitals">Hospitals</string>
+    <string name="icon_stores">Asian Stores</string>
+    <string name="icon_health">Health</string>
+    <string name="icon_chat">Chat</string>
+    <string name="icon_explore">Explore</string>
+    <string name="icon_translate">Translate</string>
+
+
+    <string name="tr_icon_news">新闻</string>
+    <string name="tr_icon_events">大事记</string>
+    <string name="tr_icon_exercise">运动</string>
+    <string name="tr_icon_stores">亚洲商店</string>
+    <string name="tr_icon_health">健康</string>
+    <string name="tr_icon_chat">聊天室</string>
+    <string name="tr_icon_explore">探索</string>
+    <string name="tr_icon_hospitals">医院</string>
+    <string name="tr_icon_translate">翻译</string>
+
+    <string name="centers">CENTERS</string>
+    <string name="doctors">DOCTORS</string>
+    <string name="hospitals">HOSPITALS</string>
+
+    <string name="tr_centers">中心</string>
+    <string name="tr_doctors">医生</string>
+    <string name="tr_hospitals">医院</string>
+
+    <string name="tap_card">Tap to view more...</string>
+    <string name="tr_tap_card">点按该卡可查看更多...</string>
+
+    <string name="breathing">\u0020 \u0020 Take a Breathing Exercise \u0020 \u0020  </string>
+    <string name="tr_breathing"> \u0020 进行呼吸运动 \u0020 </string>
+
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <!-- Setting dialog -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_text_inhale">Inhale</string>
+    <string name="settings_text_exhale">Exhale</string>
+    <string name="settings_text_hold">Hold</string>
+    <string name="settings_text_close">Close</string>
+
+    <string name="search">Search</string>
+    <string name="tr_search">搜索</string>
+
+    <string name="event_hints">comedy,concerts,food...</string>
+    <string name="tr_event_hints">喜剧，音乐会，食品...</string>
+    <string name="timer">Start</string>
+
+
+</resources>

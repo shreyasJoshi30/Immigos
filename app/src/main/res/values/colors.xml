@@ -5,6 +5,7 @@
     <color name="colorAccent">#D81B60</color>
     <color name="black">#000000</color>
     <color name="buttonTheme">#CBEEEE</color>
+    <color name="white">#FFFFFF</color>
 
 
     <color name="gradient_start_color">#4c84ff</color>
@@ -16,5 +17,10 @@
     <color name="tab_indicator_gray">#c0c0c0</color>
     <color name="intro_title_color">#000000</color>
     <color name="intro_description_color">#656565</color>
+
+
+
+
+    <color name="colorPrimaryLight">#484848</color>
 
 </resources>

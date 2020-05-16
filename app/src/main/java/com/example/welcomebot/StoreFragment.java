@@ -106,9 +106,14 @@ public class StoreFragment extends Fragment {
             @Override
             public void onClick(View v) {
 
-                Uri uri = Uri.parse("https://www.google.com/search?source=hp&ei=0PWyXuqtGriL4-EPirKlsAc&q=asian+stores+near+me&oq=asian+stores+near+me&gs_lcp=CgZwc3ktYWIQAzICCAAyAggAMgIIADICCAAyBggAEBYQHjIGCAAQFhAeMgYIABAWEB4yBggAEBYQHjIGCAAQFhAeMgYIABAWEB46BQgAEIMBOgQIABAKUIkNWMggYLohaABwAHgAgAH6AYgBjxqSAQYwLjE2LjSYAQCgAQGqAQdnd3Mtd2l6sAEA&sclient=psy-ab&ved=0ahUKEwjq1c6645_pAhW4xTgGHQpZCXYQ4dUDCAk&uact=5"); // missing 'http://' will cause crashed
+               /* Uri uri = Uri.parse("https://www.google.com/search?source=hp&ei=0PWyXuqtGriL4-EPirKlsAc&q=asian+stores+near+me&oq=asian+stores+near+me&gs_lcp=CgZwc3ktYWIQAzICCAAyAggAMgIIADICCAAyBggAEBYQHjIGCAAQFhAeMgYIABAWEB4yBggAEBYQHjIGCAAQFhAeMgYIABAWEB46BQgAEIMBOgQIABAKUIkNWMggYLohaABwAHgAgAH6AYgBjxqSAQYwLjE2LjSYAQCgAQGqAQdnd3Mtd2l6sAEA&sclient=psy-ab&ved=0ahUKEwjq1c6645_pAhW4xTgGHQpZCXYQ4dUDCAk&uact=5"); // missing 'http://' will cause crashed
                 Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-                startActivity(intent);
+                startActivity(intent);*/
+
+                getActivity().getSupportFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.fragment_container, new StoreListFragment()).addToBackStack(null)
+                        .commit();
             }
         });
 

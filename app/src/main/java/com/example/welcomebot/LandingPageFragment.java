@@ -19,6 +19,7 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.GridLayout;
 import android.widget.Switch;
@@ -114,12 +115,26 @@ public class LandingPageFragment extends Fragment {
         timeOfDay = cal.get(Calendar.HOUR_OF_DAY);
         translateLabels();
 
+
+        Button btn_breathe = rootView.findViewById(R.id.btn_breathe);
+        btn_breathe.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //call the breathing activity
+                Intent mainActivity = new Intent(getActivity(),BreathingActivity.class );
+                startActivity(mainActivity);
+
+            }
+        });
+
+
         // Inflate the layout for this fragment
         return rootView;
     }
 
     void translateLabels(){
 
+        Button btn_breathe = rootView.findViewById(R.id.btn_breathe);
         TextView tv_news = rootView.findViewById(R.id.tv_news);
         TextView tv_events = rootView.findViewById(R.id.tv_events);
         TextView tv_exercise = rootView.findViewById(R.id.tv_exercise);
@@ -157,8 +172,10 @@ public class LandingPageFragment extends Fragment {
             tv_hospitals.setText(getActivity().getResources().getString(R.string.tr_icon_hospitals));
             tv_stores.setText(getActivity().getResources().getString(R.string.tr_icon_stores));
             tv_health.setText(getActivity().getResources().getString(R.string.tr_icon_health));
-            tv_chat.setText(getActivity().getResources().getString(R.string.tr_icon_chat));
+            tv_chat.setText(getActivity().getResources().getString(R.string.tr_icon_translate));
             tv_explore.setText(getActivity().getResources().getString(R.string.tr_icon_explore));
+            btn_breathe.setText(getActivity().getResources().getString(R.string.tr_breathing));
+
         }
         else{
 
@@ -187,8 +204,9 @@ public class LandingPageFragment extends Fragment {
             tv_hospitals.setText(getActivity().getResources().getString(R.string.icon_hospitals));
             tv_stores.setText(getActivity().getResources().getString(R.string.icon_stores));
             tv_health.setText(getActivity().getResources().getString(R.string.icon_health));
-            tv_chat.setText(getActivity().getResources().getString(R.string.icon_chat));
+            tv_chat.setText(getActivity().getResources().getString(R.string.icon_translate));
             tv_explore.setText(getActivity().getResources().getString(R.string.icon_explore));
+            btn_breathe.setText(getActivity().getResources().getString(R.string.breathing));
 
         }
 
@@ -318,7 +336,7 @@ public class LandingPageFragment extends Fragment {
                             selectedFragment =  new DetailsFragment();
                             break;
                         case 6:
-                            selectedFragment = new ChatFragment();
+                            selectedFragment = new TranslateFragment();
                             bottomNavigationView.setSelectedItemId(R.id.nav_chat);
                             break;
                         case 7:
