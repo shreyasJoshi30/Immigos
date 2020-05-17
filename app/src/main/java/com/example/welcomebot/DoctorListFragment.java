@@ -23,12 +23,16 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
 
-
+/**
+ * This fragment is used to display a webview to show a list of doctors who can speak mandarin based on users current location
+ */
 public class DoctorListFragment extends Fragment {
 
     WebView doctor_webview;
     View rootview;
     LocationManager locationManager;
+
+    //------------------------------------------------------------------------------------------------------//
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -56,6 +60,10 @@ public class DoctorListFragment extends Fragment {
 
         return rootview;
     }
+    //------------------------------------------------------------------------------------------------------//
+    /**
+     * this method is used to acquire users current location.
+     */
 
     private final LocationListener mLocationListener = new LocationListener() {
         @Override
@@ -76,6 +84,11 @@ public class DoctorListFragment extends Fragment {
         }
     };
 
+    //------------------------------------------------------------------------------------------------------//
+
+    /**
+     * Method to load the webview and display results based on current location
+     */
 
     public void getNearbyDoctors(){
 
@@ -83,6 +96,7 @@ public class DoctorListFragment extends Fragment {
         // lat,lng, your current location
 
         try {
+            //getting the address from the users current location
             List<Address> addresses = geocoder.getFromLocation(currentLocation.getLatitude(), currentLocation.getLongitude(), 1);
             addresses.get(0).getPostalCode();
             System.out.println(addresses.size());
@@ -113,5 +127,6 @@ public class DoctorListFragment extends Fragment {
 
     }
 
+    //------------------------------------------------------------------------------------------------------//
 
 }

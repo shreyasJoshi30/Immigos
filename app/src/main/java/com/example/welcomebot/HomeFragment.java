@@ -52,6 +52,9 @@ import okhttp3.Response;
 import static android.content.Context.MODE_PRIVATE;
 import static android.text.Layout.JUSTIFICATION_MODE_INTER_WORD;
 
+/**
+ * The home fragment is used for displaying news from news API
+ */
 public class HomeFragment extends Fragment {
 
 
@@ -93,6 +96,7 @@ public class HomeFragment extends Fragment {
     BottomNavigationView bottomNavigationView;
 
 
+    //------------------------------------------------------------------------------------------------------//
 
     @Nullable
     @Override
@@ -225,7 +229,12 @@ public class HomeFragment extends Fragment {
 
         return rootView;
     }
+    //------------------------------------------------------------------------------------------------------//
 
+    /**
+     * method to enable or disable the bottom navigationview based on condition
+     * @param value boolean value determines the condition for toggling the bottom menu
+     */
     public void enableBotttomNav(Boolean value){
 
         BottomNavigationView bottomNavigationView = (BottomNavigationView) getActivity().findViewById(R.id.bottom_navigationid);
@@ -236,6 +245,7 @@ public class HomeFragment extends Fragment {
         bottomNavigationView.getMenu().getItem(4).setEnabled(value);
     }
 
+    //------------------------------------------------------------------------------------------------------//
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
@@ -307,6 +317,7 @@ public class HomeFragment extends Fragment {
 
         return super.onOptionsItemSelected(item);
     }
+    //------------------------------------------------------------------------------------------------------//
 
 
     /**
@@ -331,7 +342,11 @@ public class HomeFragment extends Fragment {
 
 
     }
+    //------------------------------------------------------------------------------------------------------//
 
+    /**
+     * method to change the labels to english based on language preference
+     */
     public void changeLabelToEnglish(){
         btn_business.setText("Business");
         btn_entertainment.setText("Entertainment");
@@ -349,6 +364,8 @@ public class HomeFragment extends Fragment {
 
 
     }
+    //------------------------------------------------------------------------------------------------------//
+
 
    /* public void run () throws IOException{
 
@@ -384,6 +401,7 @@ public class HomeFragment extends Fragment {
             }
         });
     }*/
+    //------------------------------------------------------------------------------------------------------//
 
 
     /**
@@ -502,6 +520,7 @@ public class HomeFragment extends Fragment {
 
     }
 
+    //------------------------------------------------------------------------------------------------------//
 
     /**
      * The method is used to create dynamic material cardviews for displaying news
@@ -534,6 +553,7 @@ public class HomeFragment extends Fragment {
         TextView newsTitle = new TextView(getActivity());
         newsTitle.setLayoutParams(layoutParams);
         newsTitle.setText(title);
+        newsTitle.setTextIsSelectable(true);
         newsTitle.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 18);
         newsTitle.setTextColor(Color.BLACK);
 
@@ -541,6 +561,7 @@ public class HomeFragment extends Fragment {
         TextView tv = new TextView(getActivity());
         tv.setLayoutParams(layoutParams);
         tv.setText(desc);
+        tv.setTextIsSelectable(true);
         tv.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
         tv.setTextColor(Color.BLACK);
 
@@ -553,7 +574,7 @@ public class HomeFragment extends Fragment {
 
         TextView tvContent = new TextView(getActivity());
         tvContent.setLayoutParams(layoutParams);
-
+        tvContent.setTextIsSelectable(true);
         if(country.equals("au") || country.equals("") ){
             tvContent.setText(clickable);
         }
@@ -599,5 +620,6 @@ public class HomeFragment extends Fragment {
 
     }
 
+    //------------------------------------------------------------------------------------------------------//
 
 }

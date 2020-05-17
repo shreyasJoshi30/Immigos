@@ -12,15 +12,21 @@ import java.util.List;
 import androidx.annotation.NonNull;
 import androidx.viewpager.widget.PagerAdapter;
 
+/**
+ * page adpater used for onboarding screens
+ */
 public class AboutViewPageAdapter extends PagerAdapter {
 
     Context mContext ;
     List<ScreenItem> mListScreen;
+    //------------------------------------------------------------------------------------------------------//
+
 
     public AboutViewPageAdapter(Context mContext, List<ScreenItem> mListScreen) {
         this.mContext = mContext;
         this.mListScreen = mListScreen;
     }
+    //------------------------------------------------------------------------------------------------------//
 
 
     @NonNull
@@ -42,11 +48,9 @@ public class AboutViewPageAdapter extends PagerAdapter {
 
         return layoutScreen;
 
-
-
-
-
     }
+    //------------------------------------------------------------------------------------------------------//
+
 
     @Override
     public int getCount() {
@@ -64,4 +68,6 @@ public class AboutViewPageAdapter extends PagerAdapter {
         container.removeView((View)object);
 
     }
+    //------------------------------------------------------------------------------------------------------//
+
 }

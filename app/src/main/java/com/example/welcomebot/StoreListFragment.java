@@ -36,6 +36,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.ml.common.modeldownload.FirebaseModelDownloadConditions;
 import com.google.firebase.ml.naturallanguage.FirebaseNaturalLanguage;
 import com.google.firebase.ml.naturallanguage.translate.FirebaseTranslateLanguage;
@@ -62,13 +63,14 @@ public class StoreListFragment extends Fragment {
     LocationManager locationManager;
     RecyclerView recyclerView;
     String defaultLanguage = "NA";
-
     CardLayoutAdapter cardLayoutAdapter;
     Location currentLocation;
     List<PlacesListBean> placeList = new ArrayList<>();
     FirebaseTranslator englishChineseTranslator;
     FirebaseModelDownloadConditions englishToChineseConditions;
+    BottomNavigationView bottomNavigationView;
 
+    //------------------------------------------------------------------------------------------------------//
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -81,6 +83,7 @@ public class StoreListFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         rootview =  inflater.inflate(R.layout.fragment_store_list, container, false);
+        bottomNavigationView  = getActivity().findViewById(R.id.bottom_navigationid);
 
         recyclerView = rootview.findViewById(R.id.storeList_recycler_view);
         SharedPreferences pref = getActivity().getSharedPreferences("myPrefs",MODE_PRIVATE);
@@ -129,6 +132,8 @@ public class StoreListFragment extends Fragment {
 
         //method call to fetch nearby stores
 
+
+
         Location loc = new Location("anc");
         PlacesListBean placesListBean = new PlacesListBean("placeid","name","addr",loc,3.0,true,0.0f,"(0)");
         placeList.add(placesListBean);
@@ -137,10 +142,13 @@ public class StoreListFragment extends Fragment {
         cardLayoutAdapter = new CardLayoutAdapter(getActivity(),placeList,defaultLanguage); // our adapter takes two string array
         recyclerView.setAdapter(cardLayoutAdapter);
         placeList.clear();
+        translateContent();
 
 
         return rootview;
     }
+
+    //------------------------------------------------------------------------------------------------------//
 
 
     @Override
@@ -172,7 +180,9 @@ public class StoreListFragment extends Fragment {
             //translate();
             ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle("亚洲商店");
             placeList.clear();
+            translateContent();
             getNearbyChineseStores();
+
 
         }
 
@@ -185,6 +195,7 @@ public class StoreListFragment extends Fragment {
             defaultLanguage = "au";
             ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle("Asian Stores");
             placeList.clear();
+            translateContent();
             getNearbyChineseStores();
 
         }
@@ -205,6 +216,41 @@ public class StoreListFragment extends Fragment {
 
         return super.onOptionsItemSelected(item);
     }
+
+    //------------------------------------------------------------------------------------------------------//
+
+    /**
+     * Method used to translate the content based on preferred language
+     */
+    public void translateContent(){
+
+        if(defaultLanguage.equals("cn")){
+
+
+            bottomNavigationView.getMenu().getItem(0).setTitle("家园");
+            bottomNavigationView.getMenu().getItem(1).setTitle(getActivity().getResources().getString(R.string.tr_icon_news));
+            bottomNavigationView.getMenu().getItem(2).setTitle(getActivity().getResources().getString(R.string.tr_icon_chat));
+            bottomNavigationView.getMenu().getItem(3).setTitle(getActivity().getResources().getString(R.string.tr_icon_events));
+            bottomNavigationView.getMenu().getItem(4).setTitle(getActivity().getResources().getString(R.string.tr_icon_explore));
+
+
+
+        }
+        else{
+
+            bottomNavigationView.getMenu().getItem(0).setTitle("Home");
+            bottomNavigationView.getMenu().getItem(1).setTitle(getActivity().getResources().getString(R.string.icon_news));
+            bottomNavigationView.getMenu().getItem(2).setTitle(getActivity().getResources().getString(R.string.icon_chat));
+            bottomNavigationView.getMenu().getItem(3).setTitle(getActivity().getResources().getString(R.string.icon_events));
+            bottomNavigationView.getMenu().getItem(4).setTitle(getActivity().getResources().getString(R.string.icon_explore));
+
+
+
+
+        }
+    }
+
+    //------------------------------------------------------------------------------------------------------//
 
 
 
@@ -229,6 +275,8 @@ public class StoreListFragment extends Fragment {
 
         }
     };
+
+    //------------------------------------------------------------------------------------------------------//
 
     /**
      * this method is used to fetch asian stores near the users current location

@@ -1,5 +1,8 @@
 package com.example.welcomebot;
 
+/**
+ * PoJo class to set the scrren item
+ */
 public class ScreenItem {
 
     String Title,Description;

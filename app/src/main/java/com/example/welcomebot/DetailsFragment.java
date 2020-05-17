@@ -16,60 +16,40 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.VideoView;
 
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.firebase.ml.common.modeldownload.FirebaseModelDownloadConditions;
+import com.google.firebase.ml.naturallanguage.FirebaseNaturalLanguage;
+import com.google.firebase.ml.naturallanguage.translate.FirebaseTranslateLanguage;
+import com.google.firebase.ml.naturallanguage.translate.FirebaseTranslator;
+import com.google.firebase.ml.naturallanguage.translate.FirebaseTranslatorOptions;
 
 import static android.content.Context.MODE_PRIVATE;
 
 
 /**
- * A simple {@link Fragment} subclass.
- * Use the {@link DetailsFragment#newInstance} factory method to
- * create an instance of this fragment.
+ * A static fragment which dislays information about mental health and well being
  */
 public class DetailsFragment extends Fragment {
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+
     View rootview;
     String defaultLanguage = "NA";
+    BottomNavigationView bottomNavigationView;
 
-    public DetailsFragment() {
-        // Required empty public constructor
-    }
+    FirebaseTranslator englishChineseTranslator;
+    FirebaseModelDownloadConditions englishToChineseConditions;
+    //------------------------------------------------------------------------------------------------------//
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment DetailsFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static DetailsFragment newInstance(String param1, String param2) {
-        DetailsFragment fragment = new DetailsFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
-    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
+
     }
 
     @Override
@@ -77,31 +57,49 @@ public class DetailsFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         rootview = inflater.inflate(R.layout.fragment_details, container, false);
+        bottomNavigationView  = getActivity().findViewById(R.id.bottom_navigationid);
         SharedPreferences pref = getActivity().getSharedPreferences("myPrefs",MODE_PRIVATE);
         defaultLanguage =pref.getString("isChinese","au");
         setHasOptionsMenu(true);
         ((AppCompatActivity)getActivity()).getSupportActionBar().setHomeAsUpIndicator(null);
 
-        if (defaultLanguage.equals("au")) {
+        //---------------------english chinese translator-------------------
 
-            ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle("Mental Health And Wellbeing");
-        } else {
-            ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle("心理健康与幸福");
-        }
+        FirebaseTranslatorOptions englishToChineseOptions =
+                new FirebaseTranslatorOptions.Builder()
+                        .setSourceLanguage(FirebaseTranslateLanguage.EN)
+                        .setTargetLanguage(FirebaseTranslateLanguage.ZH)
+                        .build();
+        englishChineseTranslator =
+                FirebaseNaturalLanguage.getInstance().getTranslator(englishToChineseOptions);
 
+        englishToChineseConditions = new FirebaseModelDownloadConditions.Builder()
+                .build();
 
-        Bundle bundle = this.getArguments();
+        englishChineseTranslator.downloadModelIfNeeded(englishToChineseConditions).addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                //isAuCndownloaded  = true;
+                //   Toast.makeText(getContext(), "English-Chinese translator downloaded", Toast.LENGTH_LONG).show();
+            }
+        });
+        //---------------------english chinese translator-------------------
+
+       translateContent();
+
+    /*    Bundle bundle = this.getArguments();
         int i = 10;
         if(bundle != null){
 
             i = bundle.getInt("cardNo");
-
-
-        }
+        }*/
 
 
         return rootview;
     }
+
+    //------------------------------------------------------------------------------------------------------//
+
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
@@ -129,8 +127,9 @@ public class DetailsFragment extends Fragment {
             editor.putString("isChinese","cn");
             editor.commit();
             defaultLanguage = "cn";
-            ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle("心理健康与幸福");
+            ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle("心灵与健康");
             //changeLabelToChinese();
+            translateContent();
         }
 
         if(id == R.id.app_bar_australia){
@@ -139,9 +138,10 @@ public class DetailsFragment extends Fragment {
             SharedPreferences.Editor editor = pref.edit();
             editor.putString("isChinese","au");
             editor.commit();
-            ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle("Mental Health And Wellbeing");
+            ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle("Mind & Health");
             defaultLanguage = "au";
             //changeLabelToEnglish();
+            translateContent();
         }
 
         if(id == R.id.app_bar_about){
@@ -162,6 +162,91 @@ public class DetailsFragment extends Fragment {
 
         return super.onOptionsItemSelected(item);
     }
+
+    //------------------------------------------------------------------------------------------------------//
+
+
+    /**
+     * Method to tranlsate the content based on user's language prefernece
+     */
+    public void translateContent(){
+
+        if(defaultLanguage.equals("cn")){
+
+
+
+
+            ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle("心灵与健康");
+
+
+            bottomNavigationView.getMenu().getItem(0).setTitle("家园");
+            bottomNavigationView.getMenu().getItem(1).setTitle(getActivity().getResources().getString(R.string.tr_icon_news));
+            bottomNavigationView.getMenu().getItem(2).setTitle(getActivity().getResources().getString(R.string.tr_icon_chat));
+            bottomNavigationView.getMenu().getItem(3).setTitle(getActivity().getResources().getString(R.string.tr_icon_events));
+            bottomNavigationView.getMenu().getItem(4).setTitle(getActivity().getResources().getString(R.string.tr_icon_explore));
+
+            translate();
+
+        }
+        else{
+            ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle("Mind & Health");
+
+            bottomNavigationView.getMenu().getItem(0).setTitle("Home");
+            bottomNavigationView.getMenu().getItem(1).setTitle(getActivity().getResources().getString(R.string.icon_news));
+            bottomNavigationView.getMenu().getItem(2).setTitle(getActivity().getResources().getString(R.string.icon_chat));
+            bottomNavigationView.getMenu().getItem(3).setTitle(getActivity().getResources().getString(R.string.icon_events));
+            bottomNavigationView.getMenu().getItem(4).setTitle(getActivity().getResources().getString(R.string.icon_explore));
+
+            TextView id_intro = rootview.findViewById(R.id.id_intro);
+            TextView id_body = rootview.findViewById(R.id.id_body);
+
+            id_intro.setText(getActivity().getResources().getString(R.string.mentalHealth));
+            id_body.setText(getActivity().getResources().getString(R.string.mentalProblems));
+
+
+
+        }
+
+
+
+
+    }
+    //------------------------------------------------------------------------------------------------------//
+
+
+    public void translate(){
+
+        englishChineseTranslator.translate(getActivity().getResources().getString(R.string.mentalHealth)).addOnSuccessListener(new OnSuccessListener<String>() {
+            @Override
+            public void onSuccess(String s) {
+
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        TextView id_intro = rootview.findViewById(R.id.id_intro);
+                        id_intro.setText(s);
+                    }
+                });
+
+            }
+        });       englishChineseTranslator.translate(getActivity().getResources().getString(R.string.mentalProblems)).addOnSuccessListener(new OnSuccessListener<String>() {
+            @Override
+            public void onSuccess(String s) {
+
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        TextView id_body = rootview.findViewById(R.id.id_body);
+                        id_body.setText(s);
+                    }
+                });
+
+            }
+        });
+
+
+    }
+    //------------------------------------------------------------------------------------------------------//
 
 
 }

@@ -61,7 +61,7 @@ import static android.content.Context.MODE_PRIVATE;
  */
 public class TranslateFragment extends Fragment {
 
-
+    //Global variables declaration
     public static final int REQUEST_CODE_SPEECH_INPUT = 1000;
     private String uuid = UUID.randomUUID().toString();
     private TextToSpeech mtts;
@@ -96,6 +96,7 @@ public class TranslateFragment extends Fragment {
     BottomNavigationView bottomNavigationView;
     String translateReply = "";
 
+    //------------------------------------------------------------------------------------------------------//
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -179,6 +180,7 @@ public class TranslateFragment extends Fragment {
 
         return rootview;
     }
+    //------------------------------------------------------------------------------------------------------//
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
@@ -190,9 +192,9 @@ public class TranslateFragment extends Fragment {
     }
 
     /**
-     * overridden method to manage the menu options on the top
-     * @param item
-     * @return
+     * overridden method to handle the ontap/onselect options of menu
+     * @param item the item that is selected
+     * @return default return true
      */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -236,6 +238,11 @@ public class TranslateFragment extends Fragment {
 
     }
 
+    //------------------------------------------------------------------------------------------------------//
+
+    /**
+     * translating labels based on language preference
+     */
     public void changeLabelToChinese(){
 
         bottomNavigationView.getMenu().getItem(0).setTitle("家园");
@@ -247,14 +254,14 @@ public class TranslateFragment extends Fragment {
 
         ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle("新闻");
         StringBuilder chineseIntro =  new StringBuilder("");
-        chineseIntro.append("    朋友，你好！我是聊天机器人immigos。我可以回答一些基本问题以帮助您更好地学习澳大利亚文化以及探索澳大利亚！\n" +
-                "你可以通过以下方式询问我：\n");
+        chineseIntro.append("    嗨，您可以尝试我的翻译功能。\n\n 我可以根据您的语言偏好为您翻译英文和中文句子 \n" +
+                "继续写点东西。\n");
 
-        chineseIntro.append("• 告诉我一些有关澳大利亚有趣的事情 \n\n");
-        chineseIntro.append("• 告诉我离我最近的市场（运动场所或公园）\n\n");
+        chineseIntro.append("• 您也可以通过按“录音”按钮来录音 \n\n");
+        /*chineseIntro.append("• 告诉我离我最近的市场（运动场所或公园）\n\n");
         chineseIntro.append("• 告诉我一个笑话 \n\n");
         chineseIntro.append("• 通过“我非常开心”或“我非常生气”来表达自己的情绪");
-
+*/
         SpannableStringBuilder ssb = new SpannableStringBuilder(chineseIntro.toString());
         ssb.setSpan(new ImageSpan(getActivity(), R.mipmap.launcher_icon), 0, 1, Spannable.SPAN_INCLUSIVE_INCLUSIVE);
         tv_chatIntro.setText(ssb, TextView.BufferType.SPANNABLE);
@@ -263,6 +270,8 @@ public class TranslateFragment extends Fragment {
         //tv_chatIntro.setText(chineseIntro.toString());
 
     }
+    //------------------------------------------------------------------------------------------------------//
+
 
     public void changeLabelToEnglish(){
         ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle("Chat");
@@ -275,12 +284,9 @@ public class TranslateFragment extends Fragment {
 
 
         StringBuilder englishIntro =  new StringBuilder("");
-        englishIntro.append("    Hi there mate, I am Immigos chatbot. \n\nI can answer basic questions and will help you along to learn about Australian culture and explore Aussieland!\n" +
-                "Go ahead and ask me ：");
-        englishIntro.append("\n\n• \"Tell me some interesting facts about Australia \" or fun facts about Australia \n\n");
-        englishIntro.append("• Show me the markets near me\" (parks or restaurants )\n\n");
-        englishIntro.append("• Ask me to tell you a joke \n\n");
-        englishIntro.append("• Express your emotions like \"I am happy\" or \"I am very angry\"");
+        englishIntro.append("    Hi there, you can try my translating feature. \n\nI can translate English and Chinese sentences for you in your desired language preference \n" +
+                "Go ahead and write something. ");
+        englishIntro.append("\n\n• \"You can also record your voice by pressing on record button \n\n");
 
         //tv_chatIntro.setText(englishIntro.toString());
 
@@ -290,6 +296,13 @@ public class TranslateFragment extends Fragment {
 
     }
 
+    //------------------------------------------------------------------------------------------------------//
+
+    /**
+     * overriddern onviewcreated to do procressing after the view has finished loading
+     * @param view
+     * @param savedInstanceState
+     */
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         //ImageView imageView = (ImageView) getView().findViewById(R.id.foo);
@@ -329,6 +342,9 @@ public class TranslateFragment extends Fragment {
             }
         });
 
+        /**
+         * record_message - button used to record the voice based on zh-chinese nd en-english model
+         */
         record_message.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -355,9 +371,8 @@ public class TranslateFragment extends Fragment {
             }
         });
 
-
-        // or  (ImageView) view.findViewById(R.id.foo);
     }
+    //------------------------------------------------------------------------------------------------------//
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -375,7 +390,12 @@ public class TranslateFragment extends Fragment {
 
         }
     }
+    //------------------------------------------------------------------------------------------------------//
 
+
+    /**
+     * initializing the chatbot with primary handshake between dialogflow and android
+     */
     private void initChatbot(){
         final AIConfiguration config =  new AIConfiguration(dialogFlowKey,
                 AIConfiguration.SupportedLanguages.English,AIConfiguration.RecognitionEngine.System);
@@ -385,6 +405,12 @@ public class TranslateFragment extends Fragment {
 
     }
 
+    //------------------------------------------------------------------------------------------------------//
+
+    /**
+     * animation effects used for text bubble
+     * @param img
+     */
     private void fadeOutAndHideView(final MaterialCardView img)
     {
         Animation fadeOut = new AlphaAnimation(1, 0);
@@ -403,6 +429,8 @@ public class TranslateFragment extends Fragment {
 
         img.startAnimation(fadeOut);
     }
+
+    //------------------------------------------------------------------------------------------------------//
 
 
     /**
@@ -486,6 +514,7 @@ public class TranslateFragment extends Fragment {
         }
     }
 
+    //------------------------------------------------------------------------------------------------------//
 
     /**
      * This method is used to display the reply based on user's / bot's text.
@@ -597,10 +626,7 @@ public class TranslateFragment extends Fragment {
                             }
                         }
                     });
-
-
                 }
-                //tv1.setText(message);
                 else {
                     mtts = new TextToSpeech(getActivity(), new TextToSpeech.OnInitListener() {
                         @Override
@@ -635,51 +661,11 @@ public class TranslateFragment extends Fragment {
                                                     chatLayout.addView(layout); // move focus to text view to automatically make it scroll up if softfocus
                                                     layout.requestFocus();
                                                 }
-
-                                                //TextView tv1 = layout.findViewById(R.id.chatMsg);
-                                                //tv1.setText(s);
-                                                //chineseTextToSpeak = s;
-                                                  /*  if (!chineseTextToSpeak.equals("")) {
-
-                                                    }*/
                                             }
                                         });
 
-                                   /* englishChineseTranslator.downloadModelIfNeeded(englishToChineseConditions).addOnSuccessListener(new OnSuccessListener<Void>() {
-                                        @Override
-                                        public void onSuccess(Void aVoid) {
-
-                                            englishChineseTranslator.translate(message).addOnSuccessListener(new OnSuccessListener<String>() {
-                                                @Override
-                                                public void onSuccess(String s) {
-
-                                                    String botResponseArray [] = s.split("\\|\\|");
-                                                    for(int i=0; i<botResponseArray.length;i++){
-
-                                                        layout = getBotLayout();
-                                                        TextView tv1 = layout.findViewById(R.id.chatMsg);
-                                                        tv1.setText(botResponseArray[i]);
-                                                        mtts.speak(botResponseArray[i], TextToSpeech.QUEUE_FLUSH, null);
-
-                                                        layout.setFocusableInTouchMode(true);
-                                                        chatLayout.addView(layout); // move focus to text view to automatically make it scroll up if softfocus
-                                                        layout.requestFocus();
-                                                    }
-
-                                                    //TextView tv1 = layout.findViewById(R.id.chatMsg);
-                                                    //tv1.setText(s);
-                                                    //chineseTextToSpeak = s;
-                                                  *//*  if (!chineseTextToSpeak.equals("")) {
-
-                                                    }*//*
-                                                }
-                                            });
-                                        }
-                                    });*/
                                     }
-                                /*if (chineseTextToSpeak.equals("")) {
-                                    mtts.speak(message, TextToSpeech.QUEUE_FLUSH, null);
-                                }*/
+
                                 }
                             } else {
                                 Log.e("TTs", "Language Not supported");
@@ -687,21 +673,19 @@ public class TranslateFragment extends Fragment {
                         }
                     });
                 }
-                /*if(chineseTextToSpeak.equals("")){
 
-                    tv1.setText(message);
-                }*/
 
                 break;
             default:
                 layout = getBotLayout();
                 break;
         }
-        //layout.setFocusableInTouchMode(true);
-        //chatLayout.addView(layout); // move focus to text view to automatically make it scroll up if softfocus
-        //layout.requestFocus();
         queryEditText.requestFocus(); // change focus back to edit text to continue typing
     }
+
+    //------------------------------------------------------------------------------------------------------//
+
+    //the bubble bots used for displaying text on screen as bot/user
 
     FrameLayout getUserLayout() {
         LayoutInflater inflater = LayoutInflater.from(getActivity());
@@ -712,11 +696,11 @@ public class TranslateFragment extends Fragment {
         LayoutInflater inflater = LayoutInflater.from(getActivity());
         return (FrameLayout) inflater.inflate(R.layout.bot_msg_layout, null);
     }
+    //------------------------------------------------------------------------------------------------------//
 
 
     public void callback() {
             showTextView(translateReply, BOT);
-
     }
 
     @Override
@@ -728,6 +712,7 @@ public class TranslateFragment extends Fragment {
         super.onDestroy();
     }
 
+    //------------------------------------------------------------------------------------------------------//
 
 
 

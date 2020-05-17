@@ -1,5 +1,8 @@
 package com.example.welcomebot;
 
+/**
+ * The util class for settings the breathing feature. the user can change colors and other parameters using this class
+ */
 public class SettingsUtils {
 
     public static int getBackgroundByPresetPosition(int position) {

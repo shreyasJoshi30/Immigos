@@ -1,10 +1,19 @@
 package com.example.welcomebot;
 
+import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.location.Address;
+import android.location.Geocoder;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.Bundle;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import android.view.LayoutInflater;
@@ -29,63 +38,37 @@ import com.google.firebase.ml.naturallanguage.translate.FirebaseTranslateLanguag
 import com.google.firebase.ml.naturallanguage.translate.FirebaseTranslator;
 import com.google.firebase.ml.naturallanguage.translate.FirebaseTranslatorOptions;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
 
 import static android.content.Context.MODE_PRIVATE;
 
-
 /**
- * A simple {@link Fragment} subclass.
- * Use the {@link ExerciseFragment#newInstance} factory method to
- * create an instance of this fragment.
+ * this fragment is used to display sports locations on maps based on users choice of sport.
  */
 public class ExerciseFragment extends Fragment {
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
     View rootview;
     Button btn_searchLocation;
-    EditText postcode;
+
     String defaultLanguage = "NA";
 
     FirebaseTranslator englishChineseTranslator;
     FirebaseModelDownloadConditions englishToChineseConditions;
     BottomNavigationView bottomNavigationView;
 
-    public ExerciseFragment() {
-        // Required empty public constructor
-    }
+    LocationManager locationManager;
+    Location currentLocation;
+    Boolean isLocationAcquired = false;
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment ExerciseFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static ExerciseFragment newInstance(String param1, String param2) {
-        ExerciseFragment fragment = new ExerciseFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
-    }
+    //------------------------------------------------------------------------------------------------------//
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
     }
 
     @Override
@@ -95,47 +78,93 @@ public class ExerciseFragment extends Fragment {
         rootview = inflater.inflate(R.layout.fragment_exercise, container, false);
         bottomNavigationView  = getActivity().findViewById(R.id.bottom_navigationid);
 
+        // the array list of sports choices
         ArrayList<String> category = new ArrayList<String>();
-        category.add("-- Select your category --");
-        category.add("Cricket");
-        category.add("Lawn Balls");
+
+        category.add("Aerobics");
+        category.add("Badminton");
+        category.add("Beach Volleyball");
+        category.add("Body Building");
+        category.add("Cycling");
+        category.add("Dancing");
+        category.add("Disk Golf");
+        category.add("Golf");
+        category.add("Shooting Sports");
+        category.add("Snooker / Billiards / Pool");
+        category.add("soccer");
+        category.add("Squash / Racquetball");
+        category.add("Table Tennis");
+        category.add("Tennis (Outdoor)");
+        category.add("Volleyball");
         setHasOptionsMenu(true);
+
+        //capturing current location
+        if(ContextCompat.checkSelfPermission(getActivity(),
+                Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED){
+
+            locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 10000,
+                    50, mLocationListener);
+        }
+
 
         SharedPreferences pref = getActivity().getSharedPreferences("myPrefs",MODE_PRIVATE);
         defaultLanguage =pref.getString("isChinese","au");
         Spinner category_spinner = (Spinner)rootview.findViewById(R.id.spinner_category);
 
+        //initialising the array adapter  for spinner
         ArrayAdapter<String> arrayAdapter;
         arrayAdapter = new ArrayAdapter<String>(getContext(), android.R.layout.simple_list_item_1, category);
-        category_spinner.setAdapter(arrayAdapter);
 
-        postcode = (EditText)rootview.findViewById(R.id.postcode);
+        category_spinner.setAdapter(
+                new NothingSelectedSpinnerAdapter(
+                        arrayAdapter,
+                        R.layout.contact_spinner_row_nothing_selected,
+                        // R.layout.contact_spinner_nothing_selected_dropdown, // Optional
+                        getActivity()));
+
+        //category_spinner.setAdapter(arrayAdapter);
+        category_spinner.setPrompt("Select your favorite category!");
+
+        // onclick listener for search button which navigates to maps fragment
         btn_searchLocation = (Button)rootview.findViewById(R.id.btn_searchLocation);
         btn_searchLocation.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(postcode.getText().length()==4){
 
-                    Bundle bundle = new Bundle();
-                   String sportsCat =  category_spinner.getSelectedItem().toString();
-                    bundle.putInt("postcode",Integer.parseInt(postcode.getText().toString()));
-                    bundle.putString("category",sportsCat);
+                if(isLocationAcquired && category_spinner.getSelectedItem() !=null){
 
-                    //Toast.makeText(getActivity(), postcode.getText().toString(), Toast.LENGTH_LONG).show();
-                    ExploreFragment exploreFragment = new ExploreFragment();
-                    exploreFragment.setArguments(bundle);
+                    Geocoder geocoder = new Geocoder(getActivity(), Locale.getDefault());
+
+                    try {
+                        List<Address> addresses = geocoder.getFromLocation(currentLocation.getLatitude(), currentLocation.getLongitude(), 1);
+                        addresses.get(0).getPostalCode();
+                       // System.out.println(addresses.size());
+                        //System.out.println(addresses.get(0).getPostalCode());
+
+                        Bundle bundle = new Bundle();
+                        String sportsCat =  category_spinner.getSelectedItem().toString();
+                        bundle.putString("postcode",addresses.get(0).getPostalCode());
+                        bundle.putString("category",sportsCat);
+
+                        //Toast.makeText(getActivity(), postcode.getText().toString(), Toast.LENGTH_LONG).show();
+                        ExploreFragment exploreFragment = new ExploreFragment();
+                        exploreFragment.setArguments(bundle);
 
 
-                    getActivity().getSupportFragmentManager()
-                            .beginTransaction()
-                            .replace(R.id.fragment_container, exploreFragment)
-                            .commit();
+                        getActivity().getSupportFragmentManager()
+                                .beginTransaction()
+                                .replace(R.id.fragment_container, exploreFragment)
+                                .commit();
 
-
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        Toast.makeText(getActivity(),e.getMessage(),Toast.LENGTH_SHORT).show();
+                    }
 
                 }
                 else{
-                    Toast.makeText(getActivity(), "Please enter a 4 digit valid postcode", Toast.LENGTH_LONG).show();
+                    Toast.makeText(getActivity(), "Please turn on your loction and select a category ", Toast.LENGTH_LONG).show();
                 }
             }
         });
@@ -175,7 +204,36 @@ public class ExerciseFragment extends Fragment {
         return rootview;
     }
 
+    //------------------------------------------------------------------------------------------------------//
 
+
+    /**
+     * LocationListener is used to listent to location changes and sets the current location
+     */
+    private final LocationListener mLocationListener = new LocationListener() {
+        @Override
+        public void onLocationChanged(final Location location) {
+            //your code here
+            currentLocation = location;
+            isLocationAcquired = true;
+        }
+        @Override
+        public void onStatusChanged(String provider, int status, Bundle extras) {
+        }
+        @Override
+        public void onProviderEnabled(String provider) {
+        }
+        @Override
+        public void onProviderDisabled(String provider) {
+
+        }
+    };
+
+    //------------------------------------------------------------------------------------------------------//
+
+    /**
+     * Method used for translating content based on language preference
+     */
     public void translate() {
 
         if (defaultLanguage.equals("cn")) {
@@ -212,6 +270,9 @@ public class ExerciseFragment extends Fragment {
         }
     }
 
+    //------------------------------------------------------------------------------------------------------//
+
+
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
 
@@ -221,6 +282,9 @@ public class ExerciseFragment extends Fragment {
         item.setVisible(false);
 
     }
+
+    //------------------------------------------------------------------------------------------------------//
+
 
     /**
      * Overridden method to handle actionbar menu
@@ -280,4 +344,6 @@ public class ExerciseFragment extends Fragment {
 
         return super.onOptionsItemSelected(item);
     }
+    //------------------------------------------------------------------------------------------------------//
+
 }

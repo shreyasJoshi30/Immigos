@@ -12,6 +12,10 @@ import androidx.appcompat.widget.Toolbar;
 import android.os.Handler;
 import android.view.View;
 
+/**
+ * The activity is used as a splash screen to display a landing page for specified time
+ *
+ */
 public class SplashScreenActivity extends AppCompatActivity {
 
     private static int SPLASH_TIME_OUT = 3000;

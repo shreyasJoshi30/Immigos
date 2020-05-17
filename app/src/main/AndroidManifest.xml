@@ -13,8 +13,11 @@
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
         <activity android:name=".BreathingActivity"
-            android:parentActivityName=".MainActivity"></activity>
-        <activity android:name=".AboutActivity">
+            android:screenOrientation="nosensor"
+            android:parentActivityName=".MainActivity">
+        </activity>
+        <activity android:name=".AboutActivity"
+            android:screenOrientation="nosensor">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -24,27 +27,12 @@
         <activity
             android:name=".SplashScreenActivity"
             android:label="@string/title_activity_splash_screen"
+            android:screenOrientation="nosensor"
             android:logo="@mipmap/launcher_icon"
             android:theme="@style/SplashScreenTheme">
-
-            <!--
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-            -->
         </activity>
-        <activity android:name=".MainActivity">
-
-            <!--
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-            -->
-
+        <activity android:name=".MainActivity"
+            android:screenOrientation="nosensor">
         </activity>
 
         <meta-data

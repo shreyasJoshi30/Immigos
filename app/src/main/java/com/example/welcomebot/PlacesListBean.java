@@ -2,6 +2,9 @@ package com.example.welcomebot;
 
 import android.location.Location;
 
+/**
+ * PoJo class with getters and setters to display places from google places API
+ */
 public class PlacesListBean {
 
     private String placeId;

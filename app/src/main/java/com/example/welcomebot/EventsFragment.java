@@ -67,6 +67,9 @@ import okhttp3.Response;
 import static android.content.Context.MODE_PRIVATE;
 import static android.text.Layout.JUSTIFICATION_MODE_INTER_WORD;
 
+/**
+ * The Fragment displays events by making an API call to eventfinda and displays its results
+ */
 public class EventsFragment extends Fragment {
 
     View rootivew;
@@ -94,6 +97,7 @@ public class EventsFragment extends Fragment {
     EditText et_search_query;
     Button btn_event_search;
 
+    //------------------------------------------------------------------------------------------------------//
 
 
     @Nullable
@@ -171,7 +175,12 @@ public class EventsFragment extends Fragment {
         }
         return rootivew;
     }
+    //------------------------------------------------------------------------------------------------------//
 
+
+    /**
+     * method to translate content based on language preference
+     */
     public void translateLabels(){
         bottomNavigationView  = getActivity().findViewById(R.id.bottom_navigationid);
 
@@ -199,6 +208,8 @@ public class EventsFragment extends Fragment {
             et_search_query.setHint(getActivity().getResources().getString(R.string.event_hints));
         }
     }
+    //------------------------------------------------------------------------------------------------------//
+
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
@@ -267,7 +278,12 @@ public class EventsFragment extends Fragment {
 
         return super.onOptionsItemSelected(item);
     }
+    //------------------------------------------------------------------------------------------------------//
 
+    /**
+     * Thus method fetches the events by making an API call to eventfinda.com.au.It also takes in a search query which filters the results.
+     * @throws Exception
+     */
 
     public void getEvents() throws Exception{
 
@@ -422,6 +438,21 @@ public class EventsFragment extends Fragment {
 
 
     }
+    //------------------------------------------------------------------------------------------------------//
+
+    /**
+     * The method is used to dynamically create cards to load the content for events on the screen
+     * @param eventName
+     * @param eventDesc
+     * @param startTime
+     * @param endTime
+     * @param address
+     * @param location
+     * @param eventUrl
+     * @param imageUrl
+     * @return
+     * @throws Exception
+     */
 
     public MaterialCardView createCard(String eventName,String eventDesc, String startTime,String endTime,String address,JSONObject
             location, String eventUrl,String imageUrl) throws Exception{
@@ -445,6 +476,7 @@ public class EventsFragment extends Fragment {
         TextView eventTitle = new TextView(getActivity());
         eventTitle.setLayoutParams(layoutParams);
         eventTitle.setText(eventName);
+        eventTitle.setTextIsSelectable(true);
         eventTitle.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 18);
         eventTitle.setTextColor(Color.BLACK);
 
@@ -452,6 +484,7 @@ public class EventsFragment extends Fragment {
         TextView tv = new TextView(getActivity());
         tv.setLayoutParams(layoutParams);
         tv.setText(eventDesc);
+        tv.setTextIsSelectable(true);
         tv.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
         tv.setTextColor(Color.BLACK);
 
@@ -499,6 +532,8 @@ public class EventsFragment extends Fragment {
 
         TextView eventDate = new TextView(getActivity());
         eventDate.setLayoutParams(layoutParams);
+        eventDate.setTextIsSelectable(true);
+
         eventDate.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
         eventDate.setTextColor(Color.BLACK);
         eventDate.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_date_range_black_24dp, 0, R.drawable.ic_add_alert_blue_24dp, 0);
@@ -522,6 +557,7 @@ public class EventsFragment extends Fragment {
 
         TextView timings = new TextView(getActivity());
         timings.setLayoutParams(layoutParams);
+        timings.setTextIsSelectable(true);
         timings.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
         timings.setTextColor(Color.BLACK);
         timings.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_watch_later_blue_24dp, 0, 0, 0);
@@ -540,6 +576,7 @@ public class EventsFragment extends Fragment {
         eventAddress.setLayoutParams(layoutParams);
         eventAddress.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
         eventAddress.setTextColor(Color.BLACK);
+        eventAddress.setTextIsSelectable(true);
         eventAddress.setText(" "+address);
         eventAddress.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_location_on_blue_24dp, 0, 0, 0);
 
@@ -643,7 +680,16 @@ public class EventsFragment extends Fragment {
         return cardView;
     }
 
+    //------------------------------------------------------------------------------------------------------//
 
+    /**
+     * This method is used to add a reminder to a local calendar on device
+     * @param eventName
+     * @param eventDesc
+     * @param eventStartTime
+     * @param eventEndTime
+     * @param address
+     */
     private void addReminder(String eventName,String eventDesc, Long eventStartTime, Long eventEndTime, String address) {
 
 
@@ -683,5 +729,7 @@ public class EventsFragment extends Fragment {
 
         Toast.makeText(getActivity(), "Event has been added to your calendar successfully", Toast.LENGTH_SHORT).show();
     }          // Toast.makeText(activity, "Reminder have been saved succes fully", Toast.LENGTH_SHORT).show();
+
+    //------------------------------------------------------------------------------------------------------//
 
 }

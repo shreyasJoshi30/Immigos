@@ -41,7 +41,9 @@ import java.util.List;
 
 import static android.content.Context.MODE_PRIVATE;
 
-
+/**
+ * The fragment displays the list of chinese medicine centers based onusers locatoin
+ */
 public class ChineseMedical extends Fragment {
 
     View rootview;
@@ -52,6 +54,7 @@ public class ChineseMedical extends Fragment {
     Location currentLocation;
     List<PlacesListBean> placeList = new ArrayList<>();
     String defaultLanguage = "NA";
+    //------------------------------------------------------------------------------------------------------//
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -83,6 +86,7 @@ public class ChineseMedical extends Fragment {
 
         //method call to fetch nearby hospitals
 
+
         Location loc = new Location("anc");
         PlacesListBean placesListBean = new PlacesListBean("placeid","name","addr",loc,3.0,true,0.0f,"(0)");
         placeList.add(placesListBean);
@@ -94,6 +98,7 @@ public class ChineseMedical extends Fragment {
 
         return rootview;
     }
+    //------------------------------------------------------------------------------------------------------//
 
     /**
      * LocationListener is used to listent to location changes and sets the current location
@@ -118,6 +123,7 @@ public class ChineseMedical extends Fragment {
     };
 
 
+    //------------------------------------------------------------------------------------------------------//
 
 
     /**
@@ -173,6 +179,7 @@ public class ChineseMedical extends Fragment {
         return super.onOptionsItemSelected(item);
     }
 
+    //------------------------------------------------------------------------------------------------------//
 
 /**
  * this method is used to fetch chinese medical centers near the users current location
@@ -293,6 +300,7 @@ public void getNearbyChineseCenters(){
 
 
 }
+    //------------------------------------------------------------------------------------------------------//
 
 
 }

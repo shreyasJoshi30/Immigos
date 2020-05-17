@@ -24,12 +24,12 @@ public class RequestTask extends AsyncTask<AIRequest, Void, AIResponse> {
     static final String BROADCAST_ACTION = "CALL_FUNCTION";
     String callingClass = "NA";
 
-
     Fragment fragment;
     private AIDataService aiDataService;
     private AIServiceContext customAIServiceContext;
 
-
+    //------------------------------------------------------------------------------------------------------//
+    //This constructor is used for communicating with chatfragment
     RequestTask(ChatFragment chatFragment,Activity activity, AIDataService aiDataService, AIServiceContext customAIServiceContext){
         this.chatFragment = chatFragment;
         this.activity = activity;
@@ -37,7 +37,8 @@ public class RequestTask extends AsyncTask<AIRequest, Void, AIResponse> {
         this.customAIServiceContext = customAIServiceContext;
         this.callingClass = "chat";
     }
-
+    //------------------------------------------------------------------------------------------------------//
+    //This constructor is used for communicating with translate fragment
     RequestTask(TranslateFragment translateFragment,Activity activity, AIDataService aiDataService, AIServiceContext customAIServiceContext){
         this.translateFragment = translateFragment;
         this.activity = activity;
@@ -46,6 +47,13 @@ public class RequestTask extends AsyncTask<AIRequest, Void, AIResponse> {
         this.callingClass = "translate";
     }
 
+    //------------------------------------------------------------------------------------------------------//
+
+    /**
+     * async method to make a request to dialogflow for chat response
+     * @param aiRequests
+     * @return
+     */
     @Override
     protected AIResponse doInBackground(AIRequest... aiRequests) {
         final AIRequest request = aiRequests[0];
@@ -62,10 +70,15 @@ public class RequestTask extends AsyncTask<AIRequest, Void, AIResponse> {
         return null;
     }
 
+    //------------------------------------------------------------------------------------------------------//
+
+    /**
+     * the callback method to display the bots response on individual classes.
+     * @param aiResponse
+     */
     @Override
     protected void onPostExecute(AIResponse aiResponse) {
-        //((MainActivity)activity).callback(aiResponse);
-        //((ChatFragment)fragment).callback(aiResponse);
+
         if(this.callingClass.equals("chat")){
             chatFragment.callback(aiResponse);
         }

@@ -64,6 +64,9 @@ import androidx.lifecycle.Observer;
 import static android.app.Activity.RESULT_OK;
 import static android.content.Context.MODE_PRIVATE;
 
+/**
+ * The fragment loads the chatbot and its activities
+ */
 public class ChatFragment extends Fragment {
 
 
@@ -100,6 +103,7 @@ public class ChatFragment extends Fragment {
     BottomNavigationView bottomNavigationView;
     ImageView record_message;
 
+    //------------------------------------------------------------------------------------------------------//
 
 
     @Nullable
@@ -180,6 +184,8 @@ public class ChatFragment extends Fragment {
 
         return rootview;
     }
+    //------------------------------------------------------------------------------------------------------//
+
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
@@ -236,6 +242,12 @@ public class ChatFragment extends Fragment {
         return super.onOptionsItemSelected(item);
     }
 
+    //------------------------------------------------------------------------------------------------------//
+
+    /**
+     * method to translate the content based on user's language preference
+     */
+
     public void changeLabelToChinese(){
 
         bottomNavigationView.getMenu().getItem(0).setTitle("家园");
@@ -289,6 +301,9 @@ public class ChatFragment extends Fragment {
         tv_chatIntro.setText(ssb, TextView.BufferType.SPANNABLE);
 
     }
+
+    //------------------------------------------------------------------------------------------------------//
+
 
 
     @Override
@@ -357,6 +372,8 @@ public class ChatFragment extends Fragment {
             }
         });
     }
+    //------------------------------------------------------------------------------------------------------//
+
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -373,7 +390,11 @@ public class ChatFragment extends Fragment {
 
         }
     }
+    //------------------------------------------------------------------------------------------------------//
 
+    /**
+     * initialising the chatbot by making handshake with dialogflow api
+     */
     private void initChatbot(){
         final AIConfiguration config =  new AIConfiguration(dialogFlowKey,
                 AIConfiguration.SupportedLanguages.English,AIConfiguration.RecognitionEngine.System);
@@ -382,7 +403,13 @@ public class ChatFragment extends Fragment {
         aiRequest = new AIRequest();
 
     }
+    //------------------------------------------------------------------------------------------------------//
 
+
+    /**
+     * animations used for handling chat conversations
+     * @param img
+     */
     private void fadeOutAndHideView(final MaterialCardView img)
     {
         Animation fadeOut = new AlphaAnimation(1, 0);
@@ -401,6 +428,8 @@ public class ChatFragment extends Fragment {
 
         img.startAnimation(fadeOut);
     }
+
+    //------------------------------------------------------------------------------------------------------//
 
     /**
      * sendMessage is used to send the query to dialogfow and make an async request to get bot's response
@@ -480,6 +509,8 @@ public class ChatFragment extends Fragment {
             requestTask.execute(aiRequest);*/
         }
     }
+
+    //------------------------------------------------------------------------------------------------------//
 
     /**
      * This method is used to display the reply based on user's / bot's text.
@@ -641,6 +672,9 @@ public class ChatFragment extends Fragment {
         queryEditText.requestFocus(); // change focus back to edit text to continue typing
     }
 
+    //------------------------------------------------------------------------------------------------------//
+// layouts to display text in user/bot style
+
     FrameLayout getUserLayout() {
         LayoutInflater inflater = LayoutInflater.from(getActivity());
         return (FrameLayout) inflater.inflate(R.layout.user_msg_layout, null);
@@ -650,6 +684,9 @@ public class ChatFragment extends Fragment {
         LayoutInflater inflater = LayoutInflater.from(getActivity());
         return (FrameLayout) inflater.inflate(R.layout.bot_msg_layout, null);
     }
+
+    //------------------------------------------------------------------------------------------------------//
+
 
     /**
      * The callback method to receive bot's response
@@ -667,6 +704,8 @@ public class ChatFragment extends Fragment {
             showTextView("There was a problem please try again!", BOT);
         }
     }
+
+    //------------------------------------------------------------------------------------------------------//
 
     @Override
     public void onDestroy() {

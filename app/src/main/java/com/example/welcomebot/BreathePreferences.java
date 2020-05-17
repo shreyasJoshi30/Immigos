@@ -7,6 +7,9 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+/**
+ * init class to load the initial preferences
+ */
 public class BreathePreferences {
 
     static final String SELECTED_PRESET_KEY = "selectedPreset";
@@ -19,7 +22,10 @@ public class BreathePreferences {
     private static BreathePreferences instance;
 
     private SharedPreferences prefs;
+    //------------------------------------------------------------------------------------------------------//
 
+
+    // maintaing the preference after the app is killed
     private BreathePreferences(@NonNull Context context) {
         prefs = context.getSharedPreferences(BREATHE_PREFS, Context.MODE_PRIVATE);
     }

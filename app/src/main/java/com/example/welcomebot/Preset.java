@@ -1,5 +1,8 @@
 package com.example.welcomebot;
 
+/**
+ * defined constants for breathing feature
+ */
 public enum Preset {
 
     WARM_FLAME(0, R.drawable.bg_circle_preset_warm_flame),

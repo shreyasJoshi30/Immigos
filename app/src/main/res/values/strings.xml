@@ -6,12 +6,17 @@
     <string name="newsAPI_key">key</string>
     <string name="eventBriteAPI_key">key</string>
     <string name="googleMaps_key">key</string>-->
-
+<!--
     <string name="dialogflow_key">mykey</string>
     <string name="newsAPI_key">mykey</string>
     <string name="eventBriteAPI_key">mykey</string>
     <string name="googleMaps_key">mykey</string>
-    <string name="placesAPI_key">mykey</string>
+    <string name="placesAPI_key">mykey</string>-->
+    <string name="dialogflow_key">4e9a3808608c4b7c862761478e74ac4a</string>
+    <string name="newsAPI_key">198d0ee81c56477cbdebc916fe9cee6e</string>
+    <string name="eventBriteAPI_key">QIHKWAO5V3PQ56Z5V452</string>
+    <string name="googleMaps_key">AIzaSyAgbxv7gN-fwv2IlOQ6ExoIBW9JGIJ30hM</string>
+    <string name="placesAPI_key">AIzaSyAs5dT99IFR0OS_8cRXcaWp421zkCV-Hjc</string>
 
 
     <!-- TODO: Remove or change this placeholder text -->
@@ -69,8 +74,8 @@
     <string name="tr_doctors">医生</string>
     <string name="tr_hospitals">医院</string>
 
-    <string name="tap_card">Tap to view more...</string>
-    <string name="tr_tap_card">点按该卡可查看更多...</string>
+    <string name="tap_card">Tap to navigate</string>
+    <string name="tr_tap_card">点按即可导航</string>
 
     <string name="breathing">\u0020 \u0020 Take a Breathing Exercise \u0020 \u0020  </string>
     <string name="tr_breathing"> \u0020 进行呼吸运动 \u0020 </string>
@@ -93,5 +98,45 @@
     <string name="tr_event_hints">喜剧，音乐会，食品...</string>
     <string name="timer">Start</string>
 
+    Sports, Libraries, Markets, Art Centers, Restaurants, Hospitals,Medicare
+    <!--maps screen button and translations-->
+    <string name = "filterButton">Sports</string>
+    <string name = "libraryBtn">Libraries</string>
+    <string name = "marketBtn">Markets</string>
+    <string name = "artBtn">Art Centers</string>
+    <string name = "foodBtn">Restaurants</string>
+    <string name = "HospitalBtn">Hospitals</string>
+    <string name = "MedicareBtn">Medicare</string>
+    <string name="range">Range(km)</string>
+
+    <string name = "tr_filterButton">体育</string>
+    <string name = "tr_libraryBtn">图书馆</string>
+    <string name = "tr_marketBtn">市场</string>
+    <string name = "tr_artBtn">艺术中心</string>
+    <string name = "tr_foodBtn">餐馆</string>
+    <string name = "tr_HospitalBtn">医院</string>
+    <string name = "tr_MedicareBtn">医疗保险</string>
+    <string name="tr_range">范围（公里）</string>
+
+
+
+    <!--Image references in the application-->
+
+
+   <!-- <a href="https://www.freepik.com/free-photos-vectors/business">Business vector created by pikisuperstar - www.freepik.com</a>
+    <a href="https://www.freepik.com/free-photos-vectors/background">Background vector created by freepik - www.freepik.com</a>
+    <a target="_blank" href="https://icons8.com/icons/set/translation">Translation icon</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a>
+    <a target="_blank" href="https://icons8.com/icons/set/treasure-map">Treasure Map icon</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a>
+    <a target="_blank" href="https://icons8.com/icons/set/questions">Questions icon</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a>
+    <a target="_blank" href="https://icons8.com/icons/set/news">News icon</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a>
+    <a target="_blank" href="https://icons8.com/icons/set/mental-health">Mental Health icon</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a>
+    <a href="https://www.freepik.com/free-photos-vectors/medical">Medical vector created by freepik - www.freepik.com</a>
+    <a target="_blank" href="https://icons8.com/icons/set/running">Running icon</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a>
+    <a target="_blank" href="https://icons8.com/icons/set/hospital">Hospital icon</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a>
+    <a target="_blank" href="https://icons8.com/icons/set/starred-ticket">Movie Ticket icon</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a>
+    <a target="_blank" href="https://icons8.com/icons/set/google-translate">Google Translate icon</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a>
+    <a href="https://www.freepik.com/free-photos-vectors/people">People vector created by rawpixel.com - www.freepik.com</a>
+    <a href="https://www.freepik.com/free-photos-vectors/travel">Travel vector created by stories - www.freepik.com</a>
+    <a href="https://www.freepik.com/free-photos-vectors/people">People vector created by freepik - www.freepik.com</a>-->
 
 </resources>

@@ -34,8 +34,9 @@ public class MainActivity extends AppCompatActivity {
 final int LOCATION_PERMISSION_CODE = 30;
 final int CALENDAR_READ_PERMISSION_CODE = 31;
 final int CALENDAR_WRITE_PERMISSION_CODE = 32;
-
 LocationManager locationManager;
+    //------------------------------------------------------------------------------------------------------//
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,6 +87,10 @@ LocationManager locationManager;
 
 
     }
+    //------------------------------------------------------------------------------------------------------//
+    /**overridden methods for current location
+     * mlocationListener to capture the current location of device
+     */
 
     private final LocationListener mLocationListener = new LocationListener() {
         @Override
@@ -108,6 +113,11 @@ LocationManager locationManager;
 
         }
     };
+    //------------------------------------------------------------------------------------------------------//
+
+    /**
+     * Code to request permissions for ACCESS_FINE_LOCATION
+     */
 
     private void requestLocationPermission(){
         if(ActivityCompat.shouldShowRequestPermissionRationale(this,Manifest.permission.ACCESS_FINE_LOCATION)){
@@ -134,7 +144,11 @@ LocationManager locationManager;
         }
 
     }
+    //------------------------------------------------------------------------------------------------------//
 
+    /**
+     * Method to requesy calendar permission READ_CALENDAR and WRITE_CALENDAR
+     */
 
     private void requestCalendarPermission(){
         if(ActivityCompat.shouldShowRequestPermissionRationale(this,Manifest.permission.READ_CALENDAR)){
@@ -162,6 +176,8 @@ LocationManager locationManager;
 
     }
 
+    //------------------------------------------------------------------------------------------------------//
+
     private void requestCalendarWritePermission(){
         if(ActivityCompat.shouldShowRequestPermissionRationale(this,Manifest.permission.WRITE_CALENDAR)){
 
@@ -188,6 +204,7 @@ LocationManager locationManager;
 
     }
 
+    //------------------------------------------------------------------------------------------------------//
 
 
 
@@ -219,9 +236,11 @@ LocationManager locationManager;
 
           }
           getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
-                  selectedFragment).addToBackStack(null).commit();
+                  selectedFragment).commit();
           return true;
         }
     };
+    //------------------------------------------------------------------------------------------------------//
+
 
 }

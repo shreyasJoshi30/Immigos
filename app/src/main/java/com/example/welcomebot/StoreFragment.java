@@ -18,6 +18,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.card.MaterialCardView;
 import com.google.firebase.ml.common.modeldownload.FirebaseModelDownloadConditions;
 import com.google.firebase.ml.naturallanguage.FirebaseNaturalLanguage;
@@ -30,57 +31,23 @@ import org.w3c.dom.Text;
 import static android.content.Context.MODE_PRIVATE;
 
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link StoreFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
-public class StoreFragment extends Fragment {
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+public class StoreFragment extends Fragment {
+
     View rootview;
     String defaultLanguage = "NA";
 
     FirebaseTranslator englishChineseTranslator;
     FirebaseModelDownloadConditions englishToChineseConditions;
-
+    BottomNavigationView bottomNavigationView;
     String translated_text;
 
-    public StoreFragment() {
-        // Required empty public constructor
-    }
+    //------------------------------------------------------------------------------------------------------//
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment StoreFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static StoreFragment newInstance(String param1, String param2) {
-        StoreFragment fragment = new StoreFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
-    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
     }
 
     @Override
@@ -89,6 +56,7 @@ public class StoreFragment extends Fragment {
         // Inflate the layout for this fragment
 
         rootview = inflater.inflate(R.layout.fragment_store, container, false);
+        bottomNavigationView  = getActivity().findViewById(R.id.bottom_navigationid);
         SharedPreferences pref = getActivity().getSharedPreferences("myPrefs",MODE_PRIVATE);
         defaultLanguage =pref.getString("isChinese","au");
         setHasOptionsMenu(true);
@@ -139,42 +107,67 @@ public class StoreFragment extends Fragment {
         });
         //---------------------english chinese translator-------------------
 
-
-        TextView id_store = rootview.findViewById(R.id.id_store);
-        if (defaultLanguage.equals("cn")) {
-            translate();
-        }
-        else{
-            String text = getActivity().getResources().getString(R.string.storeDesc);
-            id_store.setText(text);
-        }
+        translate();
 
         return rootview;
     }
 
+    //------------------------------------------------------------------------------------------------------//
 
+    /**
+     * Method used to translate the content based on language preference
+     */
     public void translate(){
 
-        TextView id_store = rootview.findViewById(R.id.id_store);
-        Button btn_search = rootview.findViewById(R.id.btn_search);
-        englishChineseTranslator.translate(getActivity().getResources().getString(R.string.storeDesc)).addOnSuccessListener(new OnSuccessListener<String>() {
-            @Override
-            public void onSuccess(String s) {
+        if (defaultLanguage.equals("cn")){
 
-                getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        TextView id_stores = rootview.findViewById(R.id.id_store);
-                        id_stores.setText(s);
-                        btn_search.setText("寻找我附近的亚洲专卖店");
-                    }
-                });
 
-            }
-        });
+            bottomNavigationView.getMenu().getItem(0).setTitle("家园");
+            bottomNavigationView.getMenu().getItem(1).setTitle(getActivity().getResources().getString(R.string.tr_icon_news));
+            bottomNavigationView.getMenu().getItem(2).setTitle(getActivity().getResources().getString(R.string.tr_icon_chat));
+            bottomNavigationView.getMenu().getItem(3).setTitle(getActivity().getResources().getString(R.string.tr_icon_events));
+            bottomNavigationView.getMenu().getItem(4).setTitle(getActivity().getResources().getString(R.string.tr_icon_explore));
+
+
+            TextView id_store = rootview.findViewById(R.id.id_store);
+            Button btn_search = rootview.findViewById(R.id.btn_search);
+            englishChineseTranslator.translate(getActivity().getResources().getString(R.string.storeDesc)).addOnSuccessListener(new OnSuccessListener<String>() {
+                @Override
+                public void onSuccess(String s) {
+
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            TextView id_stores = rootview.findViewById(R.id.id_store);
+                            id_stores.setText(s);
+                            btn_search.setText("寻找我附近的亚洲专卖店");
+                        }
+                    });
+
+                }
+            });
+
+        }
+        else{
+
+            TextView id_store = rootview.findViewById(R.id.id_store);
+            String text = getActivity().getResources().getString(R.string.storeDesc);
+            id_store.setText(text);
+
+            bottomNavigationView.getMenu().getItem(0).setTitle("Home");
+            bottomNavigationView.getMenu().getItem(1).setTitle(getActivity().getResources().getString(R.string.icon_news));
+            bottomNavigationView.getMenu().getItem(2).setTitle(getActivity().getResources().getString(R.string.icon_chat));
+            bottomNavigationView.getMenu().getItem(3).setTitle(getActivity().getResources().getString(R.string.icon_events));
+            bottomNavigationView.getMenu().getItem(4).setTitle(getActivity().getResources().getString(R.string.icon_explore));
+
+        }
+
+
 
 
     }
+    //------------------------------------------------------------------------------------------------------//
+
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
 
@@ -218,6 +211,7 @@ public class StoreFragment extends Fragment {
             id_store.setText(text);
             Button btn = rootview.findViewById(R.id.btn_search);
             btn.setText("Find Asian Stores Near Me");
+            translate();
             //changeLabelToEnglish();
         }
 
@@ -237,4 +231,6 @@ public class StoreFragment extends Fragment {
 
         return super.onOptionsItemSelected(item);
     }
+    //------------------------------------------------------------------------------------------------------//
+
 }

@@ -12,17 +12,23 @@ import android.widget.SeekBar;
 import androidx.annotation.IdRes;
 import androidx.annotation.NonNull;
 
+/**
+ * Class for instantiating the settings dialog and its processing
+ */
 public class SettingsDialog extends Dialog
 {
 
     private SettingsChangeListener listener;
 
     private RadioGroup radioGroup;
+    //------------------------------------------------------------------------------------------------------//
+
 
     public SettingsDialog(@NonNull Context context, @NonNull SettingsChangeListener listener) {
         super(context, R.style.Theme_SettingsDialog);
         this.listener = listener;
     }
+    //------------------------------------------------------------------------------------------------------//
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,6 +54,10 @@ public class SettingsDialog extends Dialog
         holdSeekBar.setProgress(SettingsUtils.getSelectedHoldDuration() / Constants.MILLISECOND);
     }
 
+    //------------------------------------------------------------------------------------------------------//
+    /**
+     * handling the color change on settings dialog
+     */
     private RadioGroup.OnCheckedChangeListener checkedChangeListener = new RadioGroup.OnCheckedChangeListener() {
         @Override
         public void onCheckedChanged(RadioGroup group, @IdRes int checkedId) {
@@ -76,7 +86,11 @@ public class SettingsDialog extends Dialog
             listener.onPresetChanged(selectedPreset.getResId());
         }
     };
+    //------------------------------------------------------------------------------------------------------//
 
+    /**
+     * onclick listener for seekbar to change the inhale/exhale and hold parameters
+     */
     private SeekBar.OnSeekBarChangeListener inhaleSeekBarChangeListener = new SeekBar.OnSeekBarChangeListener() {
         @Override
         public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -91,6 +105,8 @@ public class SettingsDialog extends Dialog
         @Override
         public void onStopTrackingTouch(SeekBar seekBar) {}
     };
+    //------------------------------------------------------------------------------------------------------//
+
 
     private SeekBar.OnSeekBarChangeListener exhaleSeekBarChangeListener = new SeekBar
             .OnSeekBarChangeListener() {
@@ -108,6 +124,9 @@ public class SettingsDialog extends Dialog
         public void onStopTrackingTouch(SeekBar seekBar) {}
     };
 
+    //------------------------------------------------------------------------------------------------------//
+
+
     private SeekBar.OnSeekBarChangeListener holdSeekBarChangeListener = new SeekBar
             .OnSeekBarChangeListener() {
         @Override
@@ -123,12 +142,16 @@ public class SettingsDialog extends Dialog
         public void onStopTrackingTouch(SeekBar seekBar) {}
     };
 
+    //------------------------------------------------------------------------------------------------------//
+
+
     private View.OnClickListener closeBtnClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
             dismiss();
         }
     };
+    //------------------------------------------------------------------------------------------------------//
 
     public interface SettingsChangeListener {
         void onPresetChanged(int backgroundResId);

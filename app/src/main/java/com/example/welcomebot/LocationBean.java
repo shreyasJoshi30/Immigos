@@ -2,6 +2,9 @@ package com.example.welcomebot;
 
 import android.location.Location;
 
+/**
+ * PoJo Bean class with getters and setters and constructors used for displaying the places on map
+ */
 public class LocationBean {
 
     private String name;

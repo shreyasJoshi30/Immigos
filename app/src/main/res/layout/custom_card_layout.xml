@@ -33,6 +33,7 @@
                     android:id="@+id/h_name"
                     android:textSize="16dp"
                     android:text="This is the title"
+                    android:textIsSelectable="true"
                     android:layout_margin="4dp"
                     android:drawableLeft="@drawable/ic_local_hospital_blue_24dp"
                     android:textAppearance="?attr/textAppearanceHeadline6"
@@ -48,6 +49,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:id="@+id/h_address"
+                            android:textIsSelectable="true"
                             android:textSize="14dp"
                             android:layout_marginTop="8dp"
                             android:text="secondary_text"
@@ -64,6 +66,7 @@
                         android:layout_marginTop="8dp"
                         android:textSize="14dp"
                         android:text="supporting_text"
+                        android:textIsSelectable="true"
                         android:textAppearance="?attr/textAppearanceBody2"
                         android:textColor="?android:attr/textColorSecondary"
                         android:layout_alignParentRight="true"
@@ -109,6 +112,11 @@
                 android:layout_height="wrap_content"/>
 
         </LinearLayout>
+        <TextView
+            android:id="@+id/id_location"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="invisible"/>
 
     </com.google.android.material.card.MaterialCardView>
 

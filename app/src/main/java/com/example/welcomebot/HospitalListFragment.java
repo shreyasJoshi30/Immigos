@@ -49,10 +49,11 @@ import java.util.List;
 
 import static android.content.Context.MODE_PRIVATE;
 
-
+/**
+ * the fragment used for displaying the nearby hospitals from google places api
+ */
 public class HospitalListFragment extends Fragment {
 
-    // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
     RecyclerView recyclerView;
@@ -62,6 +63,9 @@ public class HospitalListFragment extends Fragment {
     Location currentLocation;
     List<PlacesListBean> placeList = new ArrayList<>();
     String defaultLanguage = "NA";
+
+    //------------------------------------------------------------------------------------------------------//
+
 
 
     @Override
@@ -104,6 +108,9 @@ public class HospitalListFragment extends Fragment {
         return rootView;
     }
 
+    //------------------------------------------------------------------------------------------------------//
+
+
     /**
      * LocationListener is used to listent to location changes and sets the current location
      */
@@ -125,6 +132,8 @@ public class HospitalListFragment extends Fragment {
 
         }
     };
+
+    //------------------------------------------------------------------------------------------------------//
 
 
     @Override
@@ -190,9 +199,12 @@ public class HospitalListFragment extends Fragment {
         return super.onOptionsItemSelected(item);
     }
 
+    //------------------------------------------------------------------------------------------------------//
 
 
-
+    /**
+     * this method makes an API call to google places and displays the results for nearest hospital based on user's current location
+     */
     public void getNearbyPlaces(){
 
         //-37.895078
@@ -315,5 +327,8 @@ public class HospitalListFragment extends Fragment {
 
 
     }
+
+    //------------------------------------------------------------------------------------------------------//
+
 
 }

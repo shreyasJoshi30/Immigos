@@ -64,8 +64,13 @@ import pub.devrel.easypermissions.EasyPermissions;
 
 import static android.content.Context.MODE_PRIVATE;
 
+
+/**
+ * This fragment uses google maps api which displays the map and fetches data from the database to show interesting points and locations.
+ */
 public class ExploreFragment extends Fragment implements EasyPermissions.PermissionCallbacks {
 
+    //Global level variable declarations
     MapView mMapView;
     private GoogleMap googleMap;
     private final int REQUEST_LOCATION_PERMISSION = 1;
@@ -73,18 +78,19 @@ public class ExploreFragment extends Fragment implements EasyPermissions.Permiss
     Bundle savedInstance;
     LocationBean locationBean;
     Location currentLocation;
-    String type ="";
     SeekBar range;
     TextView tv_range;
-    int rangeValue=2;
-
+    int rangeValue=5;
     FirebaseFirestore db;
     private FusedLocationProviderClient fusedLocationClient;
-
-    int postcode=0;
-    String category="";
+    String postcode="";
     BottomNavigationView bottomNavigationView;
     String defaultLanguage = "NA";
+
+    String classify="";
+    String type="";
+    Bundle bundle = null;
+    Query query;
 
 
 
@@ -103,13 +109,14 @@ public class ExploreFragment extends Fragment implements EasyPermissions.Permiss
         tv_range = (TextView) rootView.findViewById(R.id.tv_range);
         ((AppCompatActivity)getActivity()).getSupportActionBar().setHomeAsUpIndicator(null);
 
+
+        //fetching default language from shared preferences and calling the translate function based on preference.
         SharedPreferences pref = getActivity().getSharedPreferences("myPrefs",MODE_PRIVATE);
         defaultLanguage =pref.getString("isChinese","au");
-        translateLabels();
 
 
 
-        //__________ on click listeners for map categories________________
+        //---------------------------------------on click listeners for map categories-------------------------------------------------//
 
         Button filterButton = (Button) rootView.findViewById(R.id.btn_sports);
         filterButton.setOnClickListener(new View.OnClickListener() {
@@ -117,10 +124,9 @@ public class ExploreFragment extends Fragment implements EasyPermissions.Permiss
             public void onClick(View v) {
 
                 View view = getView().findViewById(R.id.filterCard);
-                type = "Sport";
-                 fetchData(type);
+                classify = "Sport";
+                 fetchData();
                 view.setVisibility(View.GONE);
-                //Toast.makeText(getActivity(), "button clicked!", Toast.LENGTH_LONG).show();
 
             }
         });
@@ -133,10 +139,9 @@ public class ExploreFragment extends Fragment implements EasyPermissions.Permiss
             public void onClick(View v) {
 
                 View view = getView().findViewById(R.id.filterCard);
-                type = "Library";
-                fetchData(type);
+                classify = "Library";
+                fetchData();
                 view.setVisibility(View.GONE);
-                Toast.makeText(getActivity(), "button clicked!", Toast.LENGTH_LONG).show();
 
             }
         });
@@ -147,10 +152,9 @@ public class ExploreFragment extends Fragment implements EasyPermissions.Permiss
             public void onClick(View v) {
 
                 View view = getView().findViewById(R.id.filterCard);
-                type = "Market";
-                fetchData(type);
+                classify = "Market";
+                fetchData();
                 view.setVisibility(View.GONE);
-                Toast.makeText(getActivity(), "button clicked!", Toast.LENGTH_LONG).show();
 
             }
         });
@@ -160,10 +164,9 @@ public class ExploreFragment extends Fragment implements EasyPermissions.Permiss
             public void onClick(View v) {
 
                 View view = getView().findViewById(R.id.filterCard);
-                type = "Art";
-                fetchData(type);
+                classify = "Art";
+                fetchData();
                 view.setVisibility(View.GONE);
-                Toast.makeText(getActivity(), "button clicked!", Toast.LENGTH_LONG).show();
 
             }
         });
@@ -174,45 +177,101 @@ public class ExploreFragment extends Fragment implements EasyPermissions.Permiss
             public void onClick(View v) {
 
                 View view = getView().findViewById(R.id.filterCard);
-                type = "Food";
-                fetchData(type);
+                classify = "Food";
+                fetchData();
                 view.setVisibility(View.GONE);
-                Toast.makeText(getActivity(), "button clicked!", Toast.LENGTH_LONG).show();
 
             }
         });
 
+        Button HospitalBtn = (Button) rootView.findViewById(R.id.btn_hospitals);
+        HospitalBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                View view = getView().findViewById(R.id.filterCard);
+                classify = "Hospital";
+                fetchData();
+                view.setVisibility(View.GONE);
+            }
+        });
+
+
+        Button MedicareBtn = (Button) rootView.findViewById(R.id.btn_medicare);
+        MedicareBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                View view = getView().findViewById(R.id.filterCard);
+                classify = "Service";
+                fetchData();
+                view.setVisibility(View.GONE);
+            }
+        });
+        //------------------------------------------------------------------------------------------------------//
+
+        //seekbar for changing the range of search in maps
         range.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                tv_range.setText("Range: "+ String.valueOf(progress));
-                rangeValue=progress;
+                if(defaultLanguage.equals("cn")){
+
+                    tv_range.setText("范围（公里）"+ String.valueOf(progress));
+                    rangeValue=progress;
+                }else{
+
+                    tv_range.setText("Range(km) "+ String.valueOf(progress));
+                    rangeValue=progress;
+                }
             }
 
             @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
+            public void onStartTrackingTouch(SeekBar seekBar) { }
 
-            }
-
+            /**
+             * call the fetchData() method when the user sets the range for searh radius
+             * @param seekBar
+             */
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                fetchData(type);
+                fetchData();
             }
         });
 
-        //___________________________________Bundle params_________________________________________
-
-
-
+        translateLabels();
         return rootView;
 
     }
 
+    //------------------------------------------------------------------------------------------------------//
+
+    /**
+     * this method is used to translate the fragment views based on language preference.
+     * //defaultlanguage - the language preference
+     * //bottomNavigationView - the bottom menu
+     */
     public void translateLabels(){
         bottomNavigationView  = getActivity().findViewById(R.id.bottom_navigationid);
 
+
+        Button filterButton = (Button) rootView.findViewById(R.id.btn_sports);
+        Button libraryBtn = (Button) rootView.findViewById(R.id.btn_libraries);
+        Button marketBtn = (Button) rootView.findViewById(R.id.btn_markets);
+        Button artBtn = (Button) rootView.findViewById(R.id.btn_art);
+        Button foodBtn = (Button) rootView.findViewById(R.id.btn_food);
+        Button HospitalBtn = (Button) rootView.findViewById(R.id.btn_hospitals);
+        Button MedicareBtn = (Button) rootView.findViewById(R.id.btn_medicare);
+
+
         if(defaultLanguage.equals("cn")){
             ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle(getActivity().getResources().getString(R.string.tr_icon_explore));
+
+            tv_range.setText(getActivity().getResources().getString(R.string.tr_range));
+            filterButton.setText(getActivity().getResources().getString(R.string.tr_filterButton));
+            libraryBtn.setText(getActivity().getResources().getString(R.string.tr_libraryBtn));
+            marketBtn.setText(getActivity().getResources().getString(R.string.tr_marketBtn));
+            artBtn.setText(getActivity().getResources().getString(R.string.tr_artBtn));
+            foodBtn.setText(getActivity().getResources().getString(R.string.tr_foodBtn));
+            HospitalBtn.setText(getActivity().getResources().getString(R.string.tr_HospitalBtn));
+            MedicareBtn.setText(getActivity().getResources().getString(R.string.tr_MedicareBtn));
 
             bottomNavigationView.getMenu().getItem(0).setTitle("家园");
             bottomNavigationView.getMenu().getItem(1).setTitle(getActivity().getResources().getString(R.string.tr_icon_news));
@@ -224,6 +283,15 @@ public class ExploreFragment extends Fragment implements EasyPermissions.Permiss
         else{
             ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle("Explore");
 
+            tv_range.setText(getActivity().getResources().getString(R.string.range));
+            filterButton.setText(getActivity().getResources().getString(R.string.filterButton));
+            libraryBtn.setText(getActivity().getResources().getString(R.string.libraryBtn));
+            marketBtn.setText(getActivity().getResources().getString(R.string.marketBtn));
+            artBtn.setText(getActivity().getResources().getString(R.string.artBtn));
+            foodBtn.setText(getActivity().getResources().getString(R.string.foodBtn));
+            HospitalBtn.setText(getActivity().getResources().getString(R.string.HospitalBtn));
+            MedicareBtn.setText(getActivity().getResources().getString(R.string.MedicareBtn));
+
             bottomNavigationView.getMenu().getItem(0).setTitle("Home");
             bottomNavigationView.getMenu().getItem(1).setTitle(getActivity().getResources().getString(R.string.icon_news));
             bottomNavigationView.getMenu().getItem(2).setTitle(getActivity().getResources().getString(R.string.icon_chat));
@@ -231,22 +299,30 @@ public class ExploreFragment extends Fragment implements EasyPermissions.Permiss
             bottomNavigationView.getMenu().getItem(4).setTitle(getActivity().getResources().getString(R.string.icon_explore));
         }
     }
+
+    //------------------------------------------------------------------------------------------------------//
+
+    /**
+     * overdidden method used to handle supportaction bar
+     * @param menu the menu items displayed on action bar
+     * @param inflater inflator used to inflate the menu
+     */
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
 
         inflater.inflate(R.menu.custom_toolbar, menu);
 
         MenuItem china  = menu.findItem(R.id.app_bar_China);
-        //china.setVisible(false);
         MenuItem aus  = menu.findItem(R.id.app_bar_australia);
-        //aus.setVisible(false);
 
         super.onCreateOptionsMenu(menu, inflater);
-
-
     }
 
-
+    /**
+     * overridden method to handle the ontap/onselect options of menu
+     * @param item the item that is selected
+     * @return default return true
+     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
@@ -295,6 +371,8 @@ public class ExploreFragment extends Fragment implements EasyPermissions.Permiss
         return super.onOptionsItemSelected(item);
     }
 
+    //------------------------------------------------------------------------------------------------------//
+
     /**
      * loadMap methos is used to load maps on the screen and also used for getting user's current location
      * @param view
@@ -330,20 +408,10 @@ public class ExploreFragment extends Fragment implements EasyPermissions.Permiss
                     }
                     googleMap.setMyLocationEnabled(true);
 
-                // For dropping a marker at a point on the Map
-                /*LatLng melbourne = new LatLng(-37.814, 144.96332);
-                //googleMap.addMarker(new MarkerOptions().position(melbourne).title("Marker Title").snippet("Marker Description"));
-
-                // For zooming automatically to the location of the marker
-                CameraPosition cameraPosition = new CameraPosition.Builder().target(melbourne).zoom(12).build();
-                googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));*/
-
-
-
-
-
             }
         });
+
+            //fusedLocationClient is used to get current location or the last known location from the device
 
             fusedLocationClient = LocationServices.getFusedLocationProviderClient(getActivity());
 
@@ -361,15 +429,16 @@ public class ExploreFragment extends Fragment implements EasyPermissions.Permiss
                         CameraPosition cameraPosition = new CameraPosition.Builder().target(currentLoc).zoom(12).build();
                         googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
 
-                        Bundle bundle = getArguments();
+                         bundle = getArguments();
 
+                        //This data is called from exercise fragment to load only sports locations
                         if(bundle != null){
-                            postcode = bundle.getInt("postcode");
-                            category = bundle.getString("category");
-                            fetchData("Sport");
-                        }
+                            postcode = bundle.getString("postcode");
+                            type = bundle.getString("category");
+                            classify = "Sport";
+                            fetchData();
 
-                        //Toast.makeText(getContext(), "Current Location found", Toast.LENGTH_SHORT).show();
+                        }
                     }
                 }
             });
@@ -382,10 +451,10 @@ public class ExploreFragment extends Fragment implements EasyPermissions.Permiss
 
     }
 
-
+//------------------------------------------------------------------------------------------------------//
 
     /**
-     * Methods tp ask permissions from the users
+     * Methods to ask permissions from the users
      * @param requestCode
      * @param perms
      */
@@ -398,15 +467,19 @@ public class ExploreFragment extends Fragment implements EasyPermissions.Permiss
     public void onPermissionsDenied(int requestCode, @NonNull List<String> perms) {
 
         if(EasyPermissions.somePermissionPermanentlyDenied(getActivity(),perms)){
-
             new AppSettingsDialog.Builder(getActivity()).build().show();
         }
     }
 
+    /**
+     * Overridden method which will load the map once permissions are acquired
+     * @param requestCode
+     * @param resultCode
+     * @param data
+     */
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-
         if(requestCode == AppSettingsDialog.DEFAULT_SETTINGS_REQ_CODE){
             loadMap(rootView,savedInstance);
 
@@ -414,29 +487,20 @@ public class ExploreFragment extends Fragment implements EasyPermissions.Permiss
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-        mMapView.onResume();
-    }
-
+    public void onResume() { super.onResume();mMapView.onResume(); }
     @Override
-    public void onPause() {
-        super.onPause();
-        mMapView.onPause();
-    }
-
+    public void onPause() { super.onPause(); mMapView.onPause(); }
     @Override
-    public void onDestroy() {
-        super.onDestroy();
-        mMapView.onDestroy();
-    }
-
+    public void onDestroy() { super.onDestroy();mMapView.onDestroy(); }
     @Override
-    public void onLowMemory() {
-        super.onLowMemory();
-        mMapView.onLowMemory();
-    }
+    public void onLowMemory() { super.onLowMemory(); mMapView.onLowMemory(); }
 
+    /**
+     * This method is used to ask permission for gps location from the user
+     * @param requestCode default constant and unique permission code
+     * @param permissions the array of permissions which need to be asked
+     * @param grantResults the result of users action
+     */
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -444,41 +508,40 @@ public class ExploreFragment extends Fragment implements EasyPermissions.Permiss
         EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this);
     }
 
+    //------------------------------------------------------------------------------------------------------//
+
     /**
      * fetchData is used to get data from firebase
-     * @param type -  parameter used to filter the query from the dataset and plot the data on map based on results
+     * classify -  parameter used to filter the query from the dataset and plot the data on map based on results
+     * uses firestore database to access two databases
+     * //param sportsDataset - contains all the records for sports locations
+     * //param placesDatasetv - contains all the records for other locations
+     * //LocationBean - the PoJo class used for setting values
      */
-    public void fetchData(String type) {
+    public void fetchData() {
         googleMap.clear();
-        if(type.equals("")){
-            type="Market";
+        if(classify.equals("")){
+            classify="Library";
         }
 
         List<LocationBean> locationBeanList = new ArrayList<LocationBean>();
         db = FirebaseFirestore.getInstance();
-        CollectionReference locationData = db.collection("locationData");
+        if(!classify.equals("Sport")){
 
-        //.orderBy("Type").limit(5)
-
-
-
-        if(String.valueOf(postcode).length()==4 && category.length()>0){
-            //locationData.whereEqualTo("Classify",type).whereEqualTo("Postcode",postcode).whereEqualTo("Type",category);
-//            locationData.whereEqualTo("Postcode",String.valueOf(postcode)).whereEqualTo("Classify","Art");
-            locationData.whereEqualTo("Classify","art");//.whereEqualTo("Type",category);
-
-        }
-        else if(category.length()>0){
-            locationData.whereEqualTo("Classify","art");//.whereEqualTo("Type",category);
-        }
-        else if(String.valueOf(postcode).length()==4){
-            locationData.whereEqualTo("Classify","art");//.whereEqualTo("Postcode",postcode);
-        }
-        else{
-            locationData.whereEqualTo("Classify","art");
+            query = db.collection("placesDataset").whereEqualTo("Classify",classify);
+        }else{
+            if(bundle!=null){
+                //postcode = bundle.getString("postcode");
+                //String postcodeString = postcode+".0";
+                //type = bundle.getString("category");
+                query = db.collection("sportsDataset").whereEqualTo("Classify",classify).whereEqualTo("Type",type);
+            }
+            else{
+                query = db.collection("sportsDataset").whereEqualTo("Classify",classify);
+            }
         }
 
-        locationData.get()
+        query.get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
@@ -509,13 +572,13 @@ public class ExploreFragment extends Fragment implements EasyPermissions.Permiss
                                             locationBean.setAddress(m.getValue().toString());
                                             break;
                                         case "Latitude":
-                                            location.setLatitude((Double) m.getValue());
+                                            location.setLatitude(Double.parseDouble( m.getValue().toString()));
                                             break;
                                         case "Longitude":
-                                            location.setLongitude((Double) m.getValue());
+                                            location.setLongitude(Double.parseDouble( m.getValue().toString()));
                                             break;
                                         case "Postcode":
-                                            locationBean.setPostcode(Integer.parseInt(m.getValue().toString()));
+                                            locationBean.setPostcode((int)Double.parseDouble(m.getValue().toString()));
                                             break;
                                         case "Type":
                                             locationBean.setType(m.getValue().toString());
@@ -536,6 +599,7 @@ public class ExploreFragment extends Fragment implements EasyPermissions.Permiss
 
                             for (int i = 0; i < locationBeanList.size(); i++) {
 
+                                //getting the distance of the location with users current location and loading only nearby ones
                                 float distance = currentLocation.distanceTo(locationBeanList.get(i).getLocation());
                                 if (distance <= (rangeValue*1000)) {
 
@@ -550,14 +614,12 @@ public class ExploreFragment extends Fragment implements EasyPermissions.Permiss
                                                 .snippet(desc)
 
                                 );
-
                             }
                             }
-
                         }
-
-
                     }
                 });
     }
+
+    //------------------------------------------------------------------------------------------------------//
 }

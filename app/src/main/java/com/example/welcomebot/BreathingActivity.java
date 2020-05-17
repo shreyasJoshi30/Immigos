@@ -43,6 +43,7 @@ public class BreathingActivity extends AppCompatActivity implements SettingsDial
     private CountDownTimer mCountDownTimer;
     private boolean mTimerRunning;
     private long mTimeLeftInMillis = START_TIME_IN_MILLIS;
+    //------------------------------------------------------------------------------------------------------//
 
 
     @Override
@@ -104,6 +105,9 @@ public class BreathingActivity extends AppCompatActivity implements SettingsDial
 
     }
 
+    //------------------------------------------------------------------------------------------------------//
+
+
     private void setupBackgroundColor() {
         int backgroundResId = SettingsUtils.getBackgroundByPresetPosition(SettingsUtils
                 .getSelectedPreset());
@@ -123,7 +127,8 @@ public class BreathingActivity extends AppCompatActivity implements SettingsDial
         animationExhaleText.setDuration(duration);
         animationExhaleInnerCircle.setDuration(duration);
     }
-
+    //------------------------------------------------------------------------------------------------------//
+//animations for inhale and exhale circles
     private void prepareAnimations() {
         int inhaleDuration = SettingsUtils.getSelectedInhaleDuration();
         int exhaleDuration = SettingsUtils.getSelectedExhaleDuration();
@@ -152,6 +157,8 @@ public class BreathingActivity extends AppCompatActivity implements SettingsDial
         setExhaleDuration(exhaleDuration);
 
     }
+    //------------------------------------------------------------------------------------------------------//
+
 
     private Animation.AnimationListener inhaleAnimationListener = new Animation.AnimationListener() {
         @Override
@@ -177,6 +184,8 @@ public class BreathingActivity extends AppCompatActivity implements SettingsDial
         public void onAnimationRepeat(Animation animation) {
         }
     };
+    //------------------------------------------------------------------------------------------------------//
+
 
     private Animation.AnimationListener exhaleAnimationListener = new Animation.AnimationListener() {
         @Override
@@ -199,6 +208,7 @@ public class BreathingActivity extends AppCompatActivity implements SettingsDial
         @Override
         public void onAnimationRepeat(Animation animation) {}
     };
+    //------------------------------------------------------------------------------------------------------//
 
     private View.OnTouchListener contentTouchListener = new View.OnTouchListener() {
         @Override
@@ -215,6 +225,8 @@ public class BreathingActivity extends AppCompatActivity implements SettingsDial
         }
     };
 
+    //------------------------------------------------------------------------------------------------------//
+
     private View.OnClickListener fabClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
@@ -226,6 +238,7 @@ public class BreathingActivity extends AppCompatActivity implements SettingsDial
         SettingsDialog settingsDialog = new SettingsDialog(this, this);
         settingsDialog.show();
     }
+    //------------------------------------------------------------------------------------------------------//
 
     @Override
     public void onPresetChanged(int backgroundResId) {
