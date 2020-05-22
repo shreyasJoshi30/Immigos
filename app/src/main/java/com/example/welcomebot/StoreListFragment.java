@@ -89,7 +89,7 @@ public class StoreListFragment extends Fragment {
         SharedPreferences pref = getActivity().getSharedPreferences("myPrefs",MODE_PRIVATE);
         defaultLanguage =pref.getString("isChinese","au");
         setHasOptionsMenu(true);
-
+        ((AppCompatActivity) getActivity()).getSupportActionBar().setHomeAsUpIndicator(null);
         if (defaultLanguage.equals("au")) {
 
             ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle("Asian Stores");
@@ -210,7 +210,7 @@ public class StoreListFragment extends Fragment {
 
             getActivity().getSupportFragmentManager()
                     .beginTransaction()
-                    .replace(R.id.fragment_container, new StoreFragment())
+                    .replace(R.id.fragment_container, new LandingPageFragment())
                     .commit();
         }
 
@@ -329,6 +329,9 @@ public class StoreListFragment extends Fragment {
                             recyclerView.setAdapter(cardLayoutAdapter);
                             placeList.clear();
 
+                            if(newsObject.has("error_message")){
+                                Toast.makeText(getActivity(),"You have crossed the application's daily limit. Please try again after sometime.",Toast.LENGTH_LONG).show();
+                            }
 
                             for (int i = 0; i < Jarray.length(); i++) {
 

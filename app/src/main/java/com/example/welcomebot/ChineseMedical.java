@@ -227,6 +227,10 @@ public void getNearbyChineseCenters(){
                         JSONObject newsObject = new JSONObject(response.body().string());
                         JSONArray Jarray = newsObject.getJSONArray("results");
 
+                        if(newsObject.has("error_message")){
+                            Toast.makeText(getActivity(),"You have crossed the application's daily limit. Please try again after sometime.",Toast.LENGTH_LONG).show();
+                        }
+
                         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
                         cardLayoutAdapter = new CardLayoutAdapter(getActivity(),placeList,defaultLanguage); // our adapter takes two string array
                         recyclerView.setAdapter(cardLayoutAdapter);

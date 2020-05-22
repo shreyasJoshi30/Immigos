@@ -80,7 +80,7 @@ public class StoreFragment extends Fragment {
 
                 getActivity().getSupportFragmentManager()
                         .beginTransaction()
-                        .replace(R.id.fragment_container, new StoreListFragment()).addToBackStack(null)
+                        .replace(R.id.fragment_container, new StoreListFragment())
                         .commit();
             }
         });

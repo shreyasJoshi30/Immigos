@@ -76,7 +76,6 @@ public class LandingPageFragment extends Fragment {
         defaultLanguage =pref.getString("isChinese","au");
 
         setHasOptionsMenu(true);
-
         if (defaultLanguage.equals("au")) {
 
             ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle("Immigos");
@@ -96,7 +95,7 @@ public class LandingPageFragment extends Fragment {
         translateLabels();
 
 
-        Button btn_breathe = rootView.findViewById(R.id.btn_breathe);
+      /*  Button btn_breathe = rootView.findViewById(R.id.btn_breathe);
         btn_breathe.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -105,7 +104,7 @@ public class LandingPageFragment extends Fragment {
                 startActivity(mainActivity);
 
             }
-        });
+        });*/
 
 
         // Inflate the layout for this fragment
@@ -248,6 +247,12 @@ public class LandingPageFragment extends Fragment {
             startActivity(intent);
         }
 
+        if(id == R.id.app_bar_notifications){
+            Intent intent = new Intent(getActivity(), SetNotificationActivity.class);
+            intent.putExtra("SCREEN", "Notification");
+            startActivity(intent);
+        }
+
         if(id == android.R.id.home){
 
             getActivity().getSupportFragmentManager()
@@ -319,7 +324,8 @@ public class LandingPageFragment extends Fragment {
                             bottomNavigationView.setSelectedItemId(R.id.nav_events);
                             break;
                         case 2:
-                            selectedFragment = new ExerciseFragment();
+                            //selectedFragment = new ExerciseFragment();
+                            selectedFragment = new TranslateFragment();
                             break;
                         case 3:
                             selectedFragment =  new HospitalFragment();
@@ -331,8 +337,9 @@ public class LandingPageFragment extends Fragment {
                             selectedFragment =  new DetailsFragment();
                             break;
                         case 6:
-                            selectedFragment = new TranslateFragment();
-                            bottomNavigationView.setSelectedItemId(R.id.nav_chat);
+                            //selectedFragment = new TranslateFragment();
+                            selectedFragment = new ExerciseFragment();
+                            //bottomNavigationView.setSelectedItemId(R.id.nav_chat);
                             break;
                         case 7:
                             selectedFragment = new ExploreFragment();
@@ -350,8 +357,7 @@ public class LandingPageFragment extends Fragment {
 
                     getActivity().getSupportFragmentManager()
                             .beginTransaction()
-                            .replace(R.id.fragment_container, selectedFragment).addToBackStack(null)
-                            .commit();
+                            .replace(R.id.fragment_container, selectedFragment).commit();
 
                    /* Intent intent = new Intent(getfr(), DetailsFragment.class);
                     intent.putExtra("info","This is activity from card item index  "+finalI);

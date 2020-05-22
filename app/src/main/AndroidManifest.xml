@@ -12,11 +12,14 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
-        <activity android:name=".BreathingActivity"
-            android:screenOrientation="nosensor"
-            android:parentActivityName=".MainActivity">
-        </activity>
-        <activity android:name=".AboutActivity"
+        <activity android:name=".SetNotificationActivity"
+            android:parentActivityName=".MainActivity"></activity>
+        <activity
+            android:name=".BreathingActivity"
+            android:parentActivityName=".MainActivity"
+            android:screenOrientation="nosensor"></activity>
+        <activity
+            android:name=".AboutActivity"
             android:screenOrientation="nosensor">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -27,13 +30,12 @@
         <activity
             android:name=".SplashScreenActivity"
             android:label="@string/title_activity_splash_screen"
-            android:screenOrientation="nosensor"
             android:logo="@mipmap/launcher_icon"
-            android:theme="@style/SplashScreenTheme">
-        </activity>
-        <activity android:name=".MainActivity"
-            android:screenOrientation="nosensor">
-        </activity>
+            android:screenOrientation="nosensor"
+            android:theme="@style/SplashScreenTheme"></activity>
+        <activity
+            android:name=".MainActivity"
+            android:screenOrientation="nosensor"></activity>
 
         <meta-data
             android:name="com.google.android.maps.v2.API_KEY"
@@ -43,13 +45,15 @@
             android:name="org.apache.http.legacy"
             android:required="false" />
         <uses-library android:name="com.google.android.maps" />
+        <receiver android:name=".AlertReceiver" />
+
     </application>
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.READ_CALENDAR" />
     <uses-permission android:name="android.permission.WRITE_CALENDAR" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
-
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
 </manifest>

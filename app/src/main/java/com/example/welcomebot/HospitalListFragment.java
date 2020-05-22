@@ -2,6 +2,7 @@ package com.example.welcomebot;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -12,6 +13,7 @@ import android.os.Build;
 import android.os.Bundle;
 
 import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
@@ -20,6 +22,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager.widget.ViewPager;
 import okhttp3.Call;
 import okhttp3.Callback;
+import okhttp3.ConnectionPool;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -46,6 +49,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import static android.content.Context.MODE_PRIVATE;
 
@@ -209,8 +213,9 @@ public class HospitalListFragment extends Fragment {
 
         //-37.895078
         //145.05485
+        ConnectionPool pool = new ConnectionPool(5, 10000, TimeUnit.MILLISECONDS);
         String placesAPI_key = getActivity().getResources().getString(R.string.placesAPI_key);
-        OkHttpClient client = new OkHttpClient().newBuilder()
+        OkHttpClient client = new OkHttpClient().newBuilder().connectionPool(pool)
                 .build();
         StringBuilder requestURL = new StringBuilder("https://maps.googleapis.com/maps/api/place/nearbysearch/json?");
         requestURL.append("location="+currentLocation.getLatitude()+","+currentLocation.getLongitude());
@@ -245,6 +250,24 @@ public class HospitalListFragment extends Fragment {
                         try {
                             JSONObject newsObject = new JSONObject(response.body().string());
                             JSONArray Jarray = newsObject.getJSONArray("results");
+
+                            if(newsObject.has("error_message")){
+/*                                new AlertDialog.Builder(getActivity())
+                                        .setTitle("No Data Found")
+                                        .setMessage("No Data Found. Try again after sometime.")
+
+                                        // Specifying a listener allows you to take an action before dismissing the dialog.
+                                        // The dialog is automatically dismissed when a dialog button is clicked.
+                                        .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                                            public void onClick(DialogInterface dialog, int which) {
+                                                // Continue with delete operation
+
+                                            }
+                                        })
+                                        .show();*/
+
+                                Toast.makeText(getActivity(),"You have crossed the application's daily limit. Please try again after sometime.",Toast.LENGTH_LONG).show();
+                            }
 
                             recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
                             cardLayoutAdapter = new CardLayoutAdapter(getActivity(),placeList,defaultLanguage); // our adapter takes two string array

@@ -42,6 +42,19 @@
                     android:orientation="vertical"
                     android:padding="16dp">
 
+                    <Button
+
+                        android:id="@+id/btn_breathe"
+                        style="@style/Widget.MaterialComponents.Button"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@id/textGrid"
+                        android:layout_centerInParent="true"
+                        android:layout_gravity="center"
+                        android:textAllCaps="false"
+                        android:textSize="20dp"
+
+                        />
                     <!-- Title, secondary and supporting text -->
                     <!--<TextView
                         android:layout_width="wrap_content"
@@ -52,15 +65,14 @@
                         android:textAppearance="?attr/textAppearanceHeadline6"
                         />-->
                     <TextView
+                        android:id="@+id/id_intro"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
-                        android:text="@string/mentalHealth"
-                        android:id="@+id/id_intro"
                         android:justificationMode="inter_word"
-                        android:textSize="16dp"
+                        android:text="@string/mentalHealth"
                         android:textAppearance="?attr/textAppearanceBody2"
-                        />
+                        android:textSize="16dp" />
 
                 </LinearLayout>
 

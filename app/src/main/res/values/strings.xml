@@ -2,11 +2,7 @@
     <string name="app_name">Immigos</string>
     <string name="title_activity_splash_screen">Immigos</string>
 
-    <!--    <string name="dialogflow_key">key</string>
-    <string name="newsAPI_key">key</string>
-    <string name="eventBriteAPI_key">key</string>
-    <string name="googleMaps_key">key</string>-->
-<!--
+    <!--
     <string name="dialogflow_key">mykey</string>
     <string name="newsAPI_key">mykey</string>
     <string name="eventBriteAPI_key">mykey</string>
@@ -17,7 +13,7 @@
 
     <!-- TODO: Remove or change this placeholder text -->
 
-    <string name="mentalHealth">\nEmotional and mental health are important since your actions and the way of how you live are greatly influenced by your mental status, emotions and behaviors.A mentally and emotionally stable and healthy mind can bring positive influences to your life, allowing you to adapt changes in your life. \n\nMental health is especially important for senior Chinese immigrants, in this case, you. Having a major part of your life changed, difficulties such as language barrier,social isolation due to lack of social connections, we understand this could be a difficult time for you. However, when this happens, never leave yourself in despair and isolation, we are here to help, take these advice and we are sure that you will be more mentally healthy and happy. \n\n<font size="20">How do I know if I am experiencing mental problems?</font>
+    <string name="mentalHealth">Emotional and mental health are important since your actions and the way of how you live are greatly influenced by your mental status, emotions and behaviors.A mentally and emotionally stable and healthy mind can bring positive influences to your life, allowing you to adapt changes in your life. \n\nMental health is especially important for senior Chinese immigrants, in this case, you. Having a major part of your life changed, difficulties such as language barrier,social isolation due to lack of social connections, we understand this could be a difficult time for you. However, when this happens, never leave yourself in despair and isolation, we are here to help, take these advice and we are sure that you will be more mentally healthy and happy. \n\n<font size="20">How do I know if I am experiencing mental problems?</font>
 
     </string>
 
@@ -96,30 +92,29 @@
 
     Sports, Libraries, Markets, Art Centers, Restaurants, Hospitals,Medicare
     <!--maps screen button and translations-->
-    <string name = "filterButton">Sports</string>
-    <string name = "libraryBtn">Libraries</string>
-    <string name = "marketBtn">Markets</string>
-    <string name = "artBtn">Art Centers</string>
-    <string name = "foodBtn">Restaurants</string>
-    <string name = "HospitalBtn">Hospitals</string>
-    <string name = "MedicareBtn">Medicare</string>
+    <string name="filterButton">Sports</string>
+    <string name="libraryBtn">Libraries</string>
+    <string name="marketBtn">Markets</string>
+    <string name="artBtn">Art Centers</string>
+    <string name="foodBtn">Restaurants</string>
+    <string name="HospitalBtn">Hospitals</string>
+    <string name="MedicareBtn">Medicare</string>
     <string name="range">Range(km)</string>
 
-    <string name = "tr_filterButton">体育</string>
-    <string name = "tr_libraryBtn">图书馆</string>
-    <string name = "tr_marketBtn">市场</string>
-    <string name = "tr_artBtn">艺术中心</string>
-    <string name = "tr_foodBtn">餐馆</string>
-    <string name = "tr_HospitalBtn">医院</string>
-    <string name = "tr_MedicareBtn">医疗保险</string>
+    <string name="tr_filterButton">体育</string>
+    <string name="tr_libraryBtn">图书馆</string>
+    <string name="tr_marketBtn">市场</string>
+    <string name="tr_artBtn">艺术中心</string>
+    <string name="tr_foodBtn">餐馆</string>
+    <string name="tr_HospitalBtn">医院</string>
+    <string name="tr_MedicareBtn">医疗保险</string>
     <string name="tr_range">范围（公里）</string>
-
 
 
     <!--Image references in the application-->
 
 
-   <!-- <a href="https://www.freepik.com/free-photos-vectors/business">Business vector created by pikisuperstar - www.freepik.com</a>
+    <!-- <a href="https://www.freepik.com/free-photos-vectors/business">Business vector created by pikisuperstar - www.freepik.com</a>
     <a href="https://www.freepik.com/free-photos-vectors/background">Background vector created by freepik - www.freepik.com</a>
     <a target="_blank" href="https://icons8.com/icons/set/translation">Translation icon</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a>
     <a target="_blank" href="https://icons8.com/icons/set/treasure-map">Treasure Map icon</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a>

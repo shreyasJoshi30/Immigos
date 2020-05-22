@@ -19,6 +19,8 @@ import android.os.Bundle;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
 
 import android.text.Html;
@@ -37,6 +39,23 @@ final int CALENDAR_WRITE_PERMISSION_CODE = 32;
 LocationManager locationManager;
     //------------------------------------------------------------------------------------------------------//
 
+
+    @Override
+    public void onBackPressed() {
+
+
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        if(!(getSupportFragmentManager().findFragmentById(R.id.fragment_container) instanceof LandingPageFragment))
+        {
+            LandingPageFragment dashboardFragment = new LandingPageFragment();
+            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
+                    dashboardFragment).commit();
+        }else {
+            super.onBackPressed();
+        }
+        //super.onBackPressed();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

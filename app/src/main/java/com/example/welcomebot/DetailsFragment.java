@@ -94,6 +94,16 @@ public class DetailsFragment extends Fragment {
             i = bundle.getInt("cardNo");
         }*/
 
+        Button btn_breathe = rootview.findViewById(R.id.btn_breathe);
+        btn_breathe.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //call the breathing activity
+                Intent mainActivity = new Intent(getActivity(),BreathingActivity.class );
+                startActivity(mainActivity);
+
+            }
+        });
 
         return rootview;
     }
@@ -171,6 +181,7 @@ public class DetailsFragment extends Fragment {
      */
     public void translateContent(){
 
+        Button btn_breathe = rootview.findViewById(R.id.btn_breathe);
         if(defaultLanguage.equals("cn")){
 
 
@@ -185,11 +196,14 @@ public class DetailsFragment extends Fragment {
             bottomNavigationView.getMenu().getItem(3).setTitle(getActivity().getResources().getString(R.string.tr_icon_events));
             bottomNavigationView.getMenu().getItem(4).setTitle(getActivity().getResources().getString(R.string.tr_icon_explore));
 
+            btn_breathe.setText(getActivity().getResources().getString(R.string.tr_breathing));
+
             translate();
 
         }
         else{
             ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle("Mind & Health");
+            btn_breathe.setText(getActivity().getResources().getString(R.string.breathing));
 
             bottomNavigationView.getMenu().getItem(0).setTitle("Home");
             bottomNavigationView.getMenu().getItem(1).setTitle(getActivity().getResources().getString(R.string.icon_news));

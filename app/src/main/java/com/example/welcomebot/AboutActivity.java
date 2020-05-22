@@ -105,7 +105,7 @@ public class AboutActivity extends AppCompatActivity {
         //These are the screens displayed on onboarding page
 
         final List<ScreenItem> mList = new ArrayList<>();
-        mList.add(new ScreenItem("Welcome To Immigos\n  欢迎来到伊米戈斯\n","The app aims to reduce social isolation of senior Chinese immigrants with useful resources related to health, events, news and more.\n\n该应用程序旨在通过与健康，事件，新闻等相关的有用资源来减少年老中国移民的社会隔离。",R.drawable.immigos_head));
+        mList.add(new ScreenItem("Welcome To Immigos\n  欢迎来到伊米戈斯\n","The app aims to reduce social isolation of senior Chinese immigrants with useful resources related to health, events, news and more.\n\n该应用程序旨在通过与健康，事件，新闻等相关的有用资源来减少年老中国移民的社会隔离。",R.drawable.immigos_main_resize));
         mList.add(new ScreenItem("News Feed | 新闻提要","Stay updated with current affairs! Have a glance of latest news related to politics, health care, business and much more.\n\n保持时事更新！浏览与政治，医疗保健，商业等相关的最新新闻。",R.drawable.img_news_app));
         mList.add(new ScreenItem("Talk With Us | 与我们交谈","Engage with our chatbot which will help you in answering basic questions and indulge in short conversations.\n\n与我们的聊天机器人互动，它将帮助您回答基本问题并沉迷于简短的对话中。",R.drawable.img_bot_app));
         mList.add(new ScreenItem("Local Events | 当地活动","Browse a list of events which are planned around your neighborhood. Concert, stand-ups comedies, cooking classes and more…\n\n浏览您附近计划的活动列表。音乐会，单口喜剧，烹饪课等等",R.drawable.img_events));
