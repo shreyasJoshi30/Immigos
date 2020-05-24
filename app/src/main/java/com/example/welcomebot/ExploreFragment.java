@@ -408,40 +408,42 @@ public class ExploreFragment extends Fragment implements EasyPermissions.Permiss
                     }
                     googleMap.setMyLocationEnabled(true);
 
+                    //fusedLocationClient is used to get current location or the last known location from the device
+
+                    fusedLocationClient = LocationServices.getFusedLocationProviderClient(getActivity());
+
+                    //get current permission and initialise the location object
+                    fusedLocationClient.getLastLocation().addOnSuccessListener(getActivity(), new OnSuccessListener<Location>() {
+                        @Override
+                        public void onSuccess(Location location) {
+                            if(location!= null){
+                                currentLocation = location;
+                                double lat =  currentLocation.getLatitude();
+                                double lon = currentLocation.getLongitude();
+                                LatLng currentLoc = new LatLng(lat, lon);
+
+                                // For zooming automatically to the location of the marker
+                                CameraPosition cameraPosition = new CameraPosition.Builder().target(currentLoc).zoom(12).build();
+                                googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+
+                                bundle = getArguments();
+
+                                //This data is called from exercise fragment to load only sports locations
+                                if(bundle != null){
+                                    postcode = bundle.getString("postcode");
+                                    type = bundle.getString("category");
+                                    classify = "Sport";
+                                    fetchData();
+
+                                }
+                            }
+                        }
+                    });
+
             }
         });
 
-            //fusedLocationClient is used to get current location or the last known location from the device
 
-            fusedLocationClient = LocationServices.getFusedLocationProviderClient(getActivity());
-
-            //get current permission and initialise the location object
-            fusedLocationClient.getLastLocation().addOnSuccessListener(getActivity(), new OnSuccessListener<Location>() {
-                @Override
-                public void onSuccess(Location location) {
-                    if(location!= null){
-                        currentLocation = location;
-                        double lat =  currentLocation.getLatitude();
-                        double lon = currentLocation.getLongitude();
-                        LatLng currentLoc = new LatLng(lat, lon);
-
-                        // For zooming automatically to the location of the marker
-                        CameraPosition cameraPosition = new CameraPosition.Builder().target(currentLoc).zoom(12).build();
-                        googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
-
-                         bundle = getArguments();
-
-                        //This data is called from exercise fragment to load only sports locations
-                        if(bundle != null){
-                            postcode = bundle.getString("postcode");
-                            type = bundle.getString("category");
-                            classify = "Sport";
-                            fetchData();
-
-                        }
-                    }
-                }
-            });
             }
             else {
                EasyPermissions.requestPermissions(getActivity(),"This application requires your location access to load maps",

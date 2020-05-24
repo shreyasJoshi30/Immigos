@@ -29,6 +29,7 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import org.json.JSONArray;
@@ -54,6 +55,7 @@ public class ChineseMedical extends Fragment {
     Location currentLocation;
     List<PlacesListBean> placeList = new ArrayList<>();
     String defaultLanguage = "NA";
+    ProgressBar progressBar;
     //------------------------------------------------------------------------------------------------------//
 
     @Override
@@ -84,8 +86,9 @@ public class ChineseMedical extends Fragment {
         }
 
 
+        progressBar = rootview.findViewById(R.id.loading_chineseMed);
+        progressBar.setVisibility(View.VISIBLE);
         //method call to fetch nearby hospitals
-
 
         Location loc = new Location("anc");
         PlacesListBean placesListBean = new PlacesListBean("placeid","name","addr",loc,3.0,true,0.0f,"(0)");
@@ -236,6 +239,7 @@ public void getNearbyChineseCenters(){
                         recyclerView.setAdapter(cardLayoutAdapter);
                         placeList.clear();
 
+                        if(Jarray.length()>0){
 
                         for (int i = 0; i < Jarray.length(); i++) {
 
@@ -282,10 +286,22 @@ public void getNearbyChineseCenters(){
 
                             placeList.add(placesListBean);
                         }
+                            recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+                            cardLayoutAdapter = new CardLayoutAdapter(getActivity(),placeList,defaultLanguage); // our adapter takes two string array
+                            recyclerView.setAdapter(cardLayoutAdapter);
+                            progressBar.setVisibility(View.GONE);
 
-                        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-                        cardLayoutAdapter = new CardLayoutAdapter(getActivity(),placeList,defaultLanguage); // our adapter takes two string array
-                        recyclerView.setAdapter(cardLayoutAdapter);
+                    }else{
+                        if (newsObject.has("error_message")) {
+
+                            Toast.makeText(getActivity(), "You have crossed the application's daily limit. Please try again after sometime.", Toast.LENGTH_LONG).show();
+                        }else{
+                            Toast.makeText(getActivity(), "Error loading data. Please try again after sometime.", Toast.LENGTH_LONG).show();
+                        }
+                        progressBar.setVisibility(View.GONE);
+
+                    }
+
 
 
 

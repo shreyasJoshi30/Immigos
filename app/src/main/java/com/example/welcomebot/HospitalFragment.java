@@ -63,6 +63,7 @@ public class HospitalFragment extends Fragment {
         tabItem2= rootview.findViewById(R.id.tab_2);
         tabItem3 = rootview.findViewById(R.id.tab_3);
         pagerAdapter = new PageAdapter(getChildFragmentManager(),tabLayout.getTabCount());
+        viewPager.setOffscreenPageLimit(1);
         viewPager.setAdapter(pagerAdapter);
 
          ((AppCompatActivity)getActivity()).getSupportActionBar().setHomeAsUpIndicator(null);

@@ -35,6 +35,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import org.json.JSONArray;
@@ -67,7 +68,7 @@ public class HospitalListFragment extends Fragment {
     Location currentLocation;
     List<PlacesListBean> placeList = new ArrayList<>();
     String defaultLanguage = "NA";
-
+    ProgressBar progressBar;
     //------------------------------------------------------------------------------------------------------//
 
 
@@ -99,6 +100,8 @@ public class HospitalListFragment extends Fragment {
         }
 
 
+        progressBar = rootView.findViewById(R.id.loading_hospitals);
+        progressBar.setVisibility(View.VISIBLE);
         //method call to fetch nearby hospitals
 
         Location loc = new Location("anc");
@@ -251,28 +254,14 @@ public class HospitalListFragment extends Fragment {
                             JSONObject newsObject = new JSONObject(response.body().string());
                             JSONArray Jarray = newsObject.getJSONArray("results");
 
-                            if(newsObject.has("error_message")){
-/*                                new AlertDialog.Builder(getActivity())
-                                        .setTitle("No Data Found")
-                                        .setMessage("No Data Found. Try again after sometime.")
 
-                                        // Specifying a listener allows you to take an action before dismissing the dialog.
-                                        // The dialog is automatically dismissed when a dialog button is clicked.
-                                        .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-                                            public void onClick(DialogInterface dialog, int which) {
-                                                // Continue with delete operation
-
-                                            }
-                                        })
-                                        .show();*/
-
-                                Toast.makeText(getActivity(),"You have crossed the application's daily limit. Please try again after sometime.",Toast.LENGTH_LONG).show();
-                            }
 
                             recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-                            cardLayoutAdapter = new CardLayoutAdapter(getActivity(),placeList,defaultLanguage); // our adapter takes two string array
+                            cardLayoutAdapter = new CardLayoutAdapter(getActivity(), placeList, defaultLanguage); // our adapter takes two string array
                             recyclerView.setAdapter(cardLayoutAdapter);
                             placeList.clear();
+
+                            if (Jarray.length() > 0) {
 
 
                             for (int i = 0; i < Jarray.length(); i++) {
@@ -284,10 +273,10 @@ public class HospitalListFragment extends Fragment {
                                 String placeId = object.getString("place_id");
                                 String name = object.getString("name");
                                 boolean openNow = true;
-                               if(object.has("opening_hours") && !object.isNull("opening_hours")){
+                                if (object.has("opening_hours") && !object.isNull("opening_hours")) {
 
-                                   openNow = object.getJSONObject("opening_hours").getBoolean("open_now");
-                               }
+                                    openNow = object.getJSONObject("opening_hours").getBoolean("open_now");
+                                }
 
 
                                 Location placeLoc = new Location("");
@@ -295,18 +284,18 @@ public class HospitalListFragment extends Fragment {
                                 placeLoc.setLongitude(Double.parseDouble(object.getJSONObject("geometry").getJSONObject("location").getString("lng")));
 
                                 double rating = 0.0;
-                                if(object.has("rating") && !object.isNull("rating")){
+                                if (object.has("rating") && !object.isNull("rating")) {
                                     rating = object.getDouble("rating");
                                 }
 
                                 int total_user_rating = 0;
-                                if(object.has("user_ratings_total") && !object.isNull("user_ratings_total")){
+                                if (object.has("user_ratings_total") && !object.isNull("user_ratings_total")) {
                                     total_user_rating = object.getInt("user_ratings_total");
                                 }
 
                                 String address = object.getString("vicinity");
 
-                                float distance = currentLocation.distanceTo(placeLoc)/1000;
+                                float distance = currentLocation.distanceTo(placeLoc) / 1000;
 
 
                                 placesListBean.setName(name);
@@ -321,6 +310,22 @@ public class HospitalListFragment extends Fragment {
                                 placeList.add(placesListBean);
                             }
 
+                                progressBar.setVisibility(View.GONE);
+                                recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+                                cardLayoutAdapter = new CardLayoutAdapter(getActivity(),placeList,defaultLanguage); // our adapter takes two string array
+                                recyclerView.setAdapter(cardLayoutAdapter);
+
+                        }else{
+                                if (newsObject.has("error_message")) {
+
+                                    Toast.makeText(getActivity(), "You have crossed the application's daily limit. Please try again after sometime.", Toast.LENGTH_LONG).show();
+                                }else{
+                                    Toast.makeText(getActivity(), "Error loading data. Please try again after sometime.", Toast.LENGTH_LONG).show();
+                                }
+                                progressBar.setVisibility(View.GONE);
+
+                        }
+
                             //Collections.sort(placeList, (Comparator<PlacesListBean>) (o1, o2) -> o1.getDistance().compareTo(o2.getDistance()));
 
                             /*Collections.sort(placeList, new Comparator<PlacesListBean>() {
@@ -330,9 +335,7 @@ public class HospitalListFragment extends Fragment {
                                 }
                             });*/
 
-                            recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-                            cardLayoutAdapter = new CardLayoutAdapter(getActivity(),placeList,defaultLanguage); // our adapter takes two string array
-                            recyclerView.setAdapter(cardLayoutAdapter);
+
 
 
 

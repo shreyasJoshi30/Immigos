@@ -7,7 +7,10 @@
     <string name="newsAPI_key">mykey</string>
     <string name="eventBriteAPI_key">mykey</string>
     <string name="googleMaps_key">mykey</string>
-    <string name="placesAPI_key">mykey</string>-->
+    <string name="placesAPI_key">mykey</string>
+    <string name="eventfinda_username">username</string>
+    <string name="eventfinda_password">password</string>-->
+
 
 
 

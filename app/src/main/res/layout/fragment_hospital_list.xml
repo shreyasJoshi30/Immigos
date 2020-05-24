@@ -7,14 +7,19 @@
     android:background="@drawable/gradient"
     android:orientation="vertical">
 
+    <ProgressBar
+        android:id="@+id/loading_hospitals"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:indeterminateTint="#d3ecf5"
+        android:scaleX="0.5"
+        android:scaleY="0.5"
+        />
+
     <androidx.recyclerview.widget.RecyclerView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/list_recycler_view"/>
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="No Data Available"
-        android:textSize="15dp"
-        android:visibility="invisible"/>
+
+
 </LinearLayout>

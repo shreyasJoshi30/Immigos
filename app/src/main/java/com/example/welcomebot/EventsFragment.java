@@ -14,6 +14,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.provider.CalendarContract;
 import android.speech.tts.TextToSpeech;
+import android.util.Base64;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -26,6 +27,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -97,6 +99,10 @@ public class EventsFragment extends Fragment {
     EditText et_search_query;
     Button btn_event_search;
 
+    int cardlength = 0;
+    int currentCard = 0;
+    ProgressBar progressBar;
+
     //------------------------------------------------------------------------------------------------------//
 
 
@@ -128,6 +134,8 @@ public class EventsFragment extends Fragment {
         SharedPreferences pref = getActivity().getSharedPreferences("myPrefs",MODE_PRIVATE);
         defaultLanguage =pref.getString("isChinese","au");
         translateLabels();
+        progressBar = rootivew.findViewById(R.id.loading_events);
+        progressBar.setVisibility(View.VISIBLE);
 
         //---------------------english chinese translator-------------------
 
@@ -289,9 +297,13 @@ public class EventsFragment extends Fragment {
 
         OkHttpClient client = new OkHttpClient().newBuilder()
                 .build();
+        String encode = getActivity().getResources().getString(R.string.eventfinda_username)+":"+getActivity().getResources().getString(R.string.eventfinda_password);
+        //String password = "immigosapp:mj8cfxwd9qwv";
+        byte[] data = encode.getBytes("UTF-8");
+        String key = android.util.Base64.encodeToString(data, Base64.URL_SAFE | Base64.NO_WRAP);
 
         StringBuilder requestURL = new StringBuilder("http://api.eventfinda.com.au/v2/events.json?");
-        requestURL.append("fields=event:(url,name,description,sessions,point,datetime_start,datetime_end,address,images,category),session:(timezone,datetime_start)");
+            requestURL.append("fields=event:(url,name,description,sessions,point,datetime_start,datetime_end,address,images,category),session:(timezone,datetime_start)");
         requestURL.append("&order=date&row=20&location=4");
 
         if(et_search_query.getText().toString().length()>0){
@@ -301,7 +313,7 @@ public class EventsFragment extends Fragment {
         Request request = new Request.Builder()
                 .url(requestURL.toString())
                 .method("GET", null)
-                .addHeader("Authorization", "Basic aW1taWdvc2FwcDptajhjZnh3ZDlxd3Y=")
+                .addHeader("Authorization", "Basic " + key)
                 .build();
 
 
@@ -325,9 +337,10 @@ public class EventsFragment extends Fragment {
                             JSONArray Jarray = newsObject.getJSONArray("events");
 
                             homeLayout = (LinearLayout) rootivew.findViewById(R.id.v_events);
+                            cardlength = Jarray.length();
                             for (int i = 0; i < Jarray.length(); i++) {
                                 JSONObject object = Jarray.getJSONObject(i);
-
+                                currentCard = i+1;
 
                                 String eventUrl = object.getString("url");
                                 String eventName = object.getString("name");
@@ -393,10 +406,11 @@ public class EventsFragment extends Fragment {
                                                             MaterialCardView cardView = null;
                                                             try {
                                                                 cardView = createCard(tr_eventName, tr_eventDesc, startTime, endTime, tr_address, location, eventUrl, imageUrl);
+                                                                containerCardLayout.addView(cardView, layoutParams);
                                                             } catch (Exception e) {
                                                                 e.printStackTrace();
                                                             }
-                                                            containerCardLayout.addView(cardView, layoutParams);
+
 
                                                         }
                                                     });
@@ -458,13 +472,13 @@ public class EventsFragment extends Fragment {
             location, String eventUrl,String imageUrl) throws Exception{
 
 
-        LinearLayout cardLayout = new LinearLayout(getActivity());
+        LinearLayout cardLayout = new LinearLayout(getContext());
         cardLayout.setOrientation(LinearLayout.VERTICAL);
         LinearLayout.LayoutParams LLParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT
                 ,LinearLayout.LayoutParams.MATCH_PARENT);
         cardLayout.setLayoutParams(LLParams);
 
-        MaterialCardView cardView = new MaterialCardView(getActivity());
+        MaterialCardView cardView = new MaterialCardView(getContext());
         cardView.setRadius(15);
 
         cardView.setCardBackgroundColor(Color.parseColor("#FFFFFF"));
@@ -473,33 +487,35 @@ public class EventsFragment extends Fragment {
         cardView.setCardElevation(9);
 
         //Textview that will contain the title of news bulletin
-        TextView eventTitle = new TextView(getActivity());
+        TextView eventTitle = new TextView(getContext());
         eventTitle.setLayoutParams(layoutParams);
         eventTitle.setText(eventName);
         eventTitle.setTextIsSelectable(true);
         eventTitle.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 18);
         eventTitle.setTextColor(Color.BLACK);
+        eventTitle.setCompoundDrawablesWithIntrinsicBounds(0,0,R.drawable.ic_share_blue_24dp,0);
 
         // Textview that will contain the short description
-        TextView tv = new TextView(getActivity());
+        TextView tv = new TextView(getContext());
         tv.setLayoutParams(layoutParams);
         tv.setText(eventDesc);
         tv.setTextIsSelectable(true);
         tv.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
         tv.setTextColor(Color.BLACK);
 
-        ImageView eventsImage = new ImageView(getActivity());
+        ImageView eventsImage = new ImageView(getContext());
         eventsImage.setScaleType(ImageView.ScaleType.FIT_CENTER);
-        Glide.with(getActivity()).load(imageUrl).into(eventsImage);
+        Glide.with(getContext()).load(imageUrl).into(eventsImage);
         //newsImage.setImageResource(R.drawable.home_image);
 
         // Textview that will contain the short content
 
-        TextView tvContent = new TextView(getActivity());
+        TextView tvContent = new TextView(getContext());
         tvContent.setLayoutParams(layoutParams);
 
-            tvContent.setText("View more...");
+            tvContent.setText("Tap to view more...");
             tvContent.setGravity(Gravity.RIGHT);
+
 
         tvContent.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
         tvContent.setTextColor(Color.GRAY);
@@ -530,7 +546,7 @@ public class EventsFragment extends Fragment {
 
 
 
-        TextView eventDate = new TextView(getActivity());
+        TextView eventDate = new TextView(getContext());
         eventDate.setLayoutParams(layoutParams);
         eventDate.setTextIsSelectable(true);
 
@@ -555,7 +571,7 @@ public class EventsFragment extends Fragment {
         }
 
 
-        TextView timings = new TextView(getActivity());
+        TextView timings = new TextView(getContext());
         timings.setLayoutParams(layoutParams);
         timings.setTextIsSelectable(true);
         timings.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
@@ -572,7 +588,7 @@ public class EventsFragment extends Fragment {
 
         timings.setText(" "+_12HourSDF.format(startTimeDate) + " - "+ _12HourSDF.format(endTimeDate));
 
-        TextView eventAddress = new TextView(getActivity());
+        TextView eventAddress = new TextView(getContext());
         eventAddress.setLayoutParams(layoutParams);
         eventAddress.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
         eventAddress.setTextColor(Color.BLACK);
@@ -595,9 +611,9 @@ public class EventsFragment extends Fragment {
                     e.printStackTrace();
                 }
 
-                if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.WRITE_CALENDAR)
+                if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.WRITE_CALENDAR)
                         != PackageManager.PERMISSION_GRANTED
-                && ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.READ_CALENDAR) != PackageManager.PERMISSION_GRANTED) {
+                && ContextCompat.checkSelfPermission(getContext(), Manifest.permission.READ_CALENDAR) != PackageManager.PERMISSION_GRANTED) {
                     // Permission is not granted
                     // Ask for permision
                     ActivityCompat.requestPermissions(getActivity(),new String[] { Manifest.permission.WRITE_CALENDAR,Manifest.permission.READ_CALENDAR}, 35);
@@ -645,6 +661,35 @@ public class EventsFragment extends Fragment {
             }
         });
 
+        eventTitle.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                String date;
+                String shareMessage = "";
+                if(datePart_startTime.equals(datePart_endTime)){
+                    date = ""+_newDate.format(parse_datePart_startTime);
+                }
+                else{
+                    date = ""+_newDate.format(parse_datePart_startTime)+" to "+_newDate.format(parse_datePart_endTime);
+                }
+                if (defaultLanguage.equals("cn")){
+                    shareMessage = "分享使用";
+                }else{
+                    shareMessage = "Share using";
+                }
+
+                String eventTime = " "+_12HourSDF.format(startTimeDate) + " - "+ _12HourSDF.format(endTimeDate);
+                String event="Event:\n"+eventName+"\n\nDescription:\n"+eventDesc + "\n\nDate(s):\n"+ date + "\n\nTiming:\n"+ eventTime + "\n\nVenue:\n"+ address + "\n\nInfo:\n"+ eventUrl  ;
+
+
+                Intent shareIntent = new Intent(Intent.ACTION_SEND);
+                shareIntent.setType("text/plain");
+                shareIntent.putExtra(Intent.EXTRA_TEXT,event);
+                startActivity(Intent.createChooser(shareIntent,shareMessage));
+
+            }
+        });
 
         cardView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -676,6 +721,12 @@ public class EventsFragment extends Fragment {
            }
        });*/
 
+        if(currentCard == cardlength){
+
+            //System.out.println(currentCard);
+            progressBar.setVisibility(View.GONE);
+            //enableBotttomNav(true);
+        }
 
         return cardView;
     }
@@ -693,7 +744,7 @@ public class EventsFragment extends Fragment {
     private void addReminder(String eventName,String eventDesc, Long eventStartTime, Long eventEndTime, String address) {
 
 
-        ContentResolver cr=getActivity().getContentResolver();
+        ContentResolver cr=getContext().getContentResolver();
         Calendar endTime=Calendar.getInstance();
 
 

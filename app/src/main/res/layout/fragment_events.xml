@@ -41,7 +41,18 @@
                 android:text="Search"/>
 
         </LinearLayout>
+
+
     </com.google.android.material.card.MaterialCardView>
+
+    <ProgressBar
+        android:id="@+id/loading_events"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:indeterminateTint="#d3ecf5"
+        android:scaleX="0.5"
+        android:scaleY="0.5"
+        />
 
 
     <LinearLayout android:layout_width="match_parent"

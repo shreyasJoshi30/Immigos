@@ -71,7 +71,7 @@ public class SetNotificationActivity extends AppCompatActivity implements TimePi
         startAlarm(c);
     }
     private void updateTimeText(Calendar c) {
-        timeText = "Alarm set for: ";
+        timeText = " ";
         timeText += DateFormat.getTimeInstance(DateFormat.SHORT).format(c.getTime());
     }
     private void startAlarm(Calendar c) {

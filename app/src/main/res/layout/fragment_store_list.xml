@@ -4,7 +4,18 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".StoreListFragment"
-    android:background="@drawable/gradient">
+    android:background="@drawable/gradient"
+    android:orientation="vertical">
+
+    <ProgressBar
+        android:id="@+id/loading_stores"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:indeterminateTint="#d3ecf5"
+        android:scaleX="0.5"
+        android:scaleY="0.5"
+        />
+
 
     <androidx.recyclerview.widget.RecyclerView
         android:layout_width="match_parent"

@@ -32,6 +32,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -69,6 +70,7 @@ public class StoreListFragment extends Fragment {
     FirebaseTranslator englishChineseTranslator;
     FirebaseModelDownloadConditions englishToChineseConditions;
     BottomNavigationView bottomNavigationView;
+    ProgressBar progressBar;
 
     //------------------------------------------------------------------------------------------------------//
 
@@ -89,6 +91,8 @@ public class StoreListFragment extends Fragment {
         SharedPreferences pref = getActivity().getSharedPreferences("myPrefs",MODE_PRIVATE);
         defaultLanguage =pref.getString("isChinese","au");
         setHasOptionsMenu(true);
+        progressBar = rootview.findViewById(R.id.loading_stores);
+        progressBar.setVisibility(View.VISIBLE);
         ((AppCompatActivity) getActivity()).getSupportActionBar().setHomeAsUpIndicator(null);
         if (defaultLanguage.equals("au")) {
 
@@ -325,13 +329,11 @@ public class StoreListFragment extends Fragment {
                             JSONArray Jarray = newsObject.getJSONArray("results");
 
                             recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-                            cardLayoutAdapter = new CardLayoutAdapter(getActivity(),placeList,defaultLanguage); // our adapter takes two string array
+                            cardLayoutAdapter = new CardLayoutAdapter(getActivity(), placeList, defaultLanguage); // our adapter takes two string array
                             recyclerView.setAdapter(cardLayoutAdapter);
                             placeList.clear();
 
-                            if(newsObject.has("error_message")){
-                                Toast.makeText(getActivity(),"You have crossed the application's daily limit. Please try again after sometime.",Toast.LENGTH_LONG).show();
-                            }
+                            if (Jarray.length() > 0) {
 
                             for (int i = 0; i < Jarray.length(); i++) {
 
@@ -342,7 +344,7 @@ public class StoreListFragment extends Fragment {
                                 String placeId = object.getString("place_id");
                                 String name = object.getString("name");
                                 boolean openNow = true;
-                                if(object.has("opening_hours") && !object.isNull("opening_hours")){
+                                if (object.has("opening_hours") && !object.isNull("opening_hours")) {
 
                                     openNow = object.getJSONObject("opening_hours").getBoolean("open_now");
                                 }
@@ -353,19 +355,18 @@ public class StoreListFragment extends Fragment {
                                 placeLoc.setLongitude(Double.parseDouble(object.getJSONObject("geometry").getJSONObject("location").getString("lng")));
 
                                 double rating = 0.0;
-                                if(object.has("rating") && !object.isNull("rating")){
+                                if (object.has("rating") && !object.isNull("rating")) {
                                     rating = object.getDouble("rating");
                                 }
 
                                 int total_user_rating = 0;
-                                if(object.has("user_ratings_total") && !object.isNull("user_ratings_total")){
+                                if (object.has("user_ratings_total") && !object.isNull("user_ratings_total")) {
                                     total_user_rating = object.getInt("user_ratings_total");
                                 }
 
                                 String address = object.getString("vicinity");
 
-                                float distance = currentLocation.distanceTo(placeLoc)/1000;
-
+                                float distance = currentLocation.distanceTo(placeLoc) / 1000;
 
 
                                 placesListBean.setName(name);
@@ -382,8 +383,19 @@ public class StoreListFragment extends Fragment {
 
 
                             recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-                            cardLayoutAdapter = new CardLayoutAdapter(getActivity(),placeList,defaultLanguage); // our adapter takes two string array
+                            cardLayoutAdapter = new CardLayoutAdapter(getActivity(), placeList, defaultLanguage); // our adapter takes two string array
                             recyclerView.setAdapter(cardLayoutAdapter);
+                                progressBar.setVisibility(View.GONE);
+                        }
+                            else{
+                                if (newsObject.has("error_message")) {
+                                    Toast.makeText(getActivity(), "You have crossed the application's daily limit. Please try again after sometime.", Toast.LENGTH_LONG).show();
+                                }else{
+                                    Toast.makeText(getActivity(), "Error Loading Data. Please try again after some time.", Toast.LENGTH_LONG).show();
+                                }
+
+                                progressBar.setVisibility(View.GONE);
+                            }
 
 
                         } catch (JSONException e) {

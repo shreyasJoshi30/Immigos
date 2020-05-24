@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -18,6 +19,8 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -35,6 +38,7 @@ import com.google.firebase.ml.naturallanguage.translate.FirebaseTranslatorOption
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.w3c.dom.Text;
 
 import java.io.IOException;
 
@@ -70,6 +74,7 @@ public class HomeFragment extends Fragment {
     String eventBriteAPI_key;
     String country = "au";
     String newsCategory = "";
+    ProgressBar progressBar;
 
     //used for reinflating view
     private LayoutInflater mInflater;
@@ -109,6 +114,8 @@ public class HomeFragment extends Fragment {
         setHasOptionsMenu(true);
         bottomNavigationView  = getActivity().findViewById(R.id.bottom_navigationid);
 
+        progressBar = rootView.findViewById(R.id.loading_news);
+        progressBar.setVisibility(View.VISIBLE);
 
         eventBriteAPI_key = getActivity().getResources().getString(R.string.eventBriteAPI_key);
         newsAPIKey = getActivity().getResources().getString(R.string.newsAPI_key);
@@ -535,13 +542,13 @@ public class HomeFragment extends Fragment {
 
 
 
-        LinearLayout cardLayout = new LinearLayout(getActivity());
+        LinearLayout cardLayout = new LinearLayout(getContext());
         cardLayout.setOrientation(LinearLayout.VERTICAL);
             LinearLayout.LayoutParams LLParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT
                 ,LinearLayout.LayoutParams.MATCH_PARENT);
         cardLayout.setLayoutParams(LLParams);
 
-        MaterialCardView cardView = new MaterialCardView(getActivity());
+        MaterialCardView cardView = new MaterialCardView(getContext());
         cardView.setRadius(15);
 
         cardView.setCardBackgroundColor(Color.parseColor("#FFFFFF"));
@@ -550,7 +557,7 @@ public class HomeFragment extends Fragment {
         cardView.setCardElevation(9);
 
         //Textview that will contain the title of news bulletin
-        TextView newsTitle = new TextView(getActivity());
+        TextView newsTitle = new TextView(getContext());
         newsTitle.setLayoutParams(layoutParams);
         newsTitle.setText(title);
         newsTitle.setTextIsSelectable(true);
@@ -558,21 +565,62 @@ public class HomeFragment extends Fragment {
         newsTitle.setTextColor(Color.BLACK);
 
         // Textview that will contain the short description
-        TextView tv = new TextView(getActivity());
+        TextView tv = new TextView(getContext());
         tv.setLayoutParams(layoutParams);
         tv.setText(desc);
         tv.setTextIsSelectable(true);
         tv.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
         tv.setTextColor(Color.BLACK);
 
-        ImageView newsImage = new ImageView(getActivity());
+        ImageView newsImage = new ImageView(getContext());
         newsImage.setScaleType(ImageView.ScaleType.FIT_CENTER);
-        Glide.with(getActivity()).load(imageurl).into(newsImage);
+        Glide.with(getContext()).load(imageurl).into(newsImage);
         //newsImage.setImageResource(R.drawable.ic_whatshot_black_24dp);
 
         // Textview that will contain the short content
 
-        TextView tvContent = new TextView(getActivity());
+        RelativeLayout sharelayout = new RelativeLayout(getContext());
+        RelativeLayout.LayoutParams sharelayoutparams = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT);
+        //sharelayout.setOrientation(LinearLayout.HORIZONTAL);
+        //sharelayout.setBackgroundColor(Color.BLACK);
+        sharelayout.setLayoutParams(sharelayoutparams);
+
+        RelativeLayout.LayoutParams sharecontentlayoutparams = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT);
+
+        TextView sharecontent = new TextView(getContext());
+        sharecontent.setLayoutParams(sharecontentlayoutparams);
+        sharecontent.setText("");
+        sharecontent.setCompoundDrawablesWithIntrinsicBounds(0,0,R.drawable.ic_share_blue_24dp,0);
+        sharecontent.setGravity(Gravity.RIGHT);
+
+        sharecontent.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                String shareMessage = "";
+                String news="Headline:\n"+title+"\n\n"+desc + "\n\nInfo:\n"+ newsUrl  ;
+                if (defaultLanguage.equals("cn")){
+                    shareMessage = "分享使用";
+                }else{
+                    shareMessage = "Share using";
+                }
+
+                Intent shareIntent = new Intent(Intent.ACTION_SEND);
+                shareIntent.setType("text/plain");
+                shareIntent.putExtra(Intent.EXTRA_TEXT,news);
+                startActivity(Intent.createChooser(shareIntent,shareMessage));
+
+            }
+        });
+
+
+       /* RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams)sharecontent.getLayoutParams();
+        params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+        sharecontent.setLayoutParams(params); //causes layout update
+*/
+
+
+        TextView tvContent = new TextView(getContext());
         tvContent.setLayoutParams(layoutParams);
         tvContent.setTextIsSelectable(true);
         if(country.equals("au") || country.equals("") ){
@@ -606,13 +654,22 @@ public class HomeFragment extends Fragment {
         //scrollView.setLayoutParams(layoutParams);
         //scrollView.addView(cardLayout);
         cardLayout.addView(newsTitle);
+
+
+
         cardLayout.addView(tv);
-        cardLayout.addView(tvContent);
+
+        //cardLayout.addView(tvContent);
+
+        cardLayout.addView(sharelayout);
+        sharelayout.addView(tvContent);
+        sharelayout.addView(sharecontent);
         cardView.addView(cardLayout);
 
         if(currentCard == cardlength){
 
             System.out.println(currentCard);
+            progressBar.setVisibility(View.GONE);
             enableBotttomNav(true);
         }
 
