@@ -15,11 +15,13 @@ The application will require the user to sign up for following API Keys
 
 5- Firebase The application will require google-services.JSON under the root(app) folder
 
-Create a strings.xml file under res/values/  and add all the api keys as shown below.
+Create the string resources as shown below and fill the values by obtaining the keys.
 
 ```xml
     <string name="dialogflow_key">Your_key</string>
     <string name="newsAPI_key">Your_key</string>
     <string name="eventBriteAPI_key">Your_key</string>
     <string name="googleMaps_key">Your_key</string>
+    <string name="eventfinda_username">username</string>
+    <string name="eventfinda_password">password</string>
 ```
