@@ -7,6 +7,53 @@
     android:orientation="vertical"
     android:background="@drawable/gradient">
 
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/searchEventFilter"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="9dp"
+        android:animateLayoutChanges="true"
+        app:cardCornerRadius="3dp"
+        android:elevation="9dp">
+
+        <LinearLayout
+            android:weightSum="8"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+    <EditText
+        android:id="@+id/et_search_query"
+        android:layout_height="match_parent"
+        android:layout_weight="7"
+        android:layout_width="wrap_content"
+        android:drawableLeft="@drawable/ic_search_grey_24dp"
+        android:inputType="text"/>
+
+            <Button
+                android:layout_margin="4dp"
+                android:layout_weight="1"
+                android:id="@+id/btn_event_search"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:textAllCaps="false"
+                android:background="@drawable/btn_selector"
+                android:text="Search"/>
+
+        </LinearLayout>
+
+
+    </com.google.android.material.card.MaterialCardView>
+
+    <ProgressBar
+        android:id="@+id/loading_events"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:indeterminateTint="#d3ecf5"
+        android:scaleX="0.5"
+        android:scaleY="0.5"
+        />
+
 
     <LinearLayout android:layout_width="match_parent"
         android:layout_height="match_parent"

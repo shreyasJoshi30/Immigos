@@ -9,7 +9,7 @@ The application will require the user to sign up for following API Keys
 
 2- Dialogflow API key (https://dialogflow.com/docs/reference/v2-auth-setup)
 
-3- Eventbrite API key (https://www.eventbrite.com/platform/api)
+3- Eventfinda API key (https://www.eventfinda.com.au/api/v2/index)
 
 4- NewsAPI API key (https://newsapi.org/)
 

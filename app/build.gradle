@@ -34,6 +34,7 @@ dependencies {
     androidTestImplementation 'androidx.test:runner:1.1.0-alpha4'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.0-alpha4'
     implementation 'com.google.android.material:material:1.0.0'
+    //implementation 'com.google.android.material:material:1.2.0-alpha06'
 
     // dialogflow implementation dependency
     implementation 'ai.api:sdk:2.0.7@aar'
@@ -64,6 +65,8 @@ dependencies {
 
     //Library to detect the language
     implementation 'com.google.firebase:firebase-ml-natural-language-language-id-model:20.0.7'
+
+    implementation 'com.github.ceryle:SegmentedButton:v2.0.2'
 
 
 }

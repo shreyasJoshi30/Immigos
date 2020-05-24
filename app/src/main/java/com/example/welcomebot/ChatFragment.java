@@ -1,8 +1,10 @@
 package com.example.welcomebot;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
+import android.speech.RecognizerIntent;
 import android.speech.tts.TextToSpeech;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
@@ -32,6 +34,7 @@ import android.widget.Toast;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.card.MaterialCardView;
 import com.google.firebase.ml.common.modeldownload.FirebaseModelDownloadConditions;
 import com.google.firebase.ml.naturallanguage.FirebaseNaturalLanguage;
@@ -40,6 +43,7 @@ import com.google.firebase.ml.naturallanguage.translate.FirebaseTranslateLanguag
 import com.google.firebase.ml.naturallanguage.translate.FirebaseTranslator;
 import com.google.firebase.ml.naturallanguage.translate.FirebaseTranslatorOptions;
 
+import java.util.ArrayList;
 import java.util.Locale;
 import java.util.UUID;
 
@@ -51,13 +55,22 @@ import ai.api.model.AIRequest;
 import ai.api.model.AIResponse;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Observer;
 
+import static android.app.Activity.RESULT_OK;
+import static android.content.Context.MODE_PRIVATE;
+
+/**
+ * The fragment loads the chatbot and its activities
+ */
 public class ChatFragment extends Fragment {
 
 
+    private static final int REQUEST_CODE_SPEECH_INPUT =1000 ;
     private String uuid = UUID.randomUUID().toString();
     private TextToSpeech mtts;
     private AIRequest aiRequest;
@@ -74,7 +87,7 @@ public class ChatFragment extends Fragment {
     FirebaseModelDownloadConditions englishToChineseConditions;
     FirebaseModelDownloadConditions chineseToEnglishConditions;
     FirebaseLanguageIdentification languageIdentifier;
-    String defaultLanguage = "au";
+    String defaultLanguage = "NA";
 
     String translatedText="";
     String chineseTextToSpeak="";
@@ -87,18 +100,28 @@ public class ChatFragment extends Fragment {
     View rootview;
     FrameLayout layout;
 
+    BottomNavigationView bottomNavigationView;
+    ImageView record_message;
+
+    //------------------------------------------------------------------------------------------------------//
+
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 
-        setHasOptionsMenu(true);
 
-        rootview = inflater.inflate(R.layout.fragment_chat,container,false);;
+
+        rootview = inflater.inflate(R.layout.fragment_chat,container,false);
+        setHasOptionsMenu(true);
          introCardView = (MaterialCardView) rootview.findViewById(R.id.introCard);
          tv_chatIntro = (TextView) rootview.findViewById(R.id.tv_chatIntro);
          tv_chatQuestions =(TextView) rootview.findViewById(R.id.tv_chatQuestions);
-        changeLabelToEnglish();
+        //changeLabelToEnglish();
+        bottomNavigationView  = getActivity().findViewById(R.id.bottom_navigationid);
+
+        SharedPreferences pref = getActivity().getSharedPreferences("myPrefs",MODE_PRIVATE);
+        defaultLanguage =pref.getString("isChinese","au");
 
         // language detection initializer
          languageIdentifier = FirebaseNaturalLanguage.getInstance().getLanguageIdentification();
@@ -144,8 +167,25 @@ public class ChatFragment extends Fragment {
                // Toast.makeText(getContext(), "English-Chinese translator downloaded", Toast.LENGTH_LONG).show();
             }
         });
-     return rootview;
+
+        //---------------------back navigation-------------------
+        ((AppCompatActivity)getActivity()).getSupportActionBar().setHomeAsUpIndicator(null);
+        if(defaultLanguage.equals("cn")){
+            changeLabelToChinese();
+            ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle("新闻");
+
+        }
+        else{
+            changeLabelToEnglish();
+            ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle("Chat");
+
+        }
+
+
+        return rootview;
     }
+    //------------------------------------------------------------------------------------------------------//
+
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
@@ -166,23 +206,58 @@ public class ChatFragment extends Fragment {
         int id = item.getItemId();
 
         if(id == R.id.app_bar_China){
-            defaultLanguage ="cn";
-            Toast.makeText(getActivity(), "Language switched to Chinese", Toast.LENGTH_LONG).show();
+
+            SharedPreferences pref = getActivity().getSharedPreferences("myPrefs",MODE_PRIVATE);
+            SharedPreferences.Editor editor = pref.edit();
+            editor.putString("isChinese","cn");
+            editor.commit();
+            defaultLanguage = "cn";
+            //Toast.makeText(getActivity(), "Language switched to Chinese", Toast.LENGTH_LONG).show();
             changeLabelToChinese();
 
         }
 
         if(id == R.id.app_bar_australia){
+
+            SharedPreferences pref = getActivity().getSharedPreferences("myPrefs",MODE_PRIVATE);
+            SharedPreferences.Editor editor = pref.edit();
+            editor.putString("isChinese","au");
+            editor.commit();
             defaultLanguage = "au";
-            Toast.makeText(getActivity(), "Language switched to English", Toast.LENGTH_LONG).show();
+            //Toast.makeText(getActivity(), "Language switched to English", Toast.LENGTH_LONG).show();
             changeLabelToEnglish();
+
+        }
+
+        if(id == android.R.id.home){
+           BottomNavigationView bottomNavigationView  = getActivity().findViewById(R.id.bottom_navigationid);
+            bottomNavigationView.setSelectedItemId(R.id.nav_landingPage);
+            getActivity().getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.fragment_container, new LandingPageFragment())
+                    .commit();
 
         }
 
         return super.onOptionsItemSelected(item);
     }
 
+    //------------------------------------------------------------------------------------------------------//
+
+    /**
+     * method to translate the content based on user's language preference
+     */
+
     public void changeLabelToChinese(){
+
+        bottomNavigationView.getMenu().getItem(0).setTitle("家园");
+        bottomNavigationView.getMenu().getItem(1).setTitle(getActivity().getResources().getString(R.string.tr_icon_news));
+        bottomNavigationView.getMenu().getItem(2).setTitle(getActivity().getResources().getString(R.string.tr_icon_chat));
+        bottomNavigationView.getMenu().getItem(3).setTitle(getActivity().getResources().getString(R.string.tr_icon_events));
+        bottomNavigationView.getMenu().getItem(4).setTitle(getActivity().getResources().getString(R.string.tr_icon_explore));
+
+
+        ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle("新闻");
         StringBuilder chineseIntro =  new StringBuilder("");
         chineseIntro.append("    朋友，你好！我是聊天机器人immigos。我可以回答一些基本问题以帮助您更好地学习澳大利亚文化以及探索澳大利亚！\n" +
                 "你可以通过以下方式询问我：\n");
@@ -202,6 +277,14 @@ public class ChatFragment extends Fragment {
     }
 
     public void changeLabelToEnglish(){
+        ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle("Chat");
+
+        bottomNavigationView.getMenu().getItem(0).setTitle("Home");
+        bottomNavigationView.getMenu().getItem(1).setTitle(getActivity().getResources().getString(R.string.icon_news));
+        bottomNavigationView.getMenu().getItem(2).setTitle(getActivity().getResources().getString(R.string.icon_chat));
+        bottomNavigationView.getMenu().getItem(3).setTitle(getActivity().getResources().getString(R.string.icon_events));
+        bottomNavigationView.getMenu().getItem(4).setTitle(getActivity().getResources().getString(R.string.icon_explore));
+
 
         StringBuilder englishIntro =  new StringBuilder("");
         englishIntro.append("    Hi there mate, I am Immigos chatbot. \n\nI can answer basic questions and will help you along to learn about Australian culture and explore Aussieland!\n" +
@@ -219,6 +302,9 @@ public class ChatFragment extends Fragment {
 
     }
 
+    //------------------------------------------------------------------------------------------------------//
+
+
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
@@ -233,13 +319,15 @@ public class ChatFragment extends Fragment {
         ImageView sendBtn =(ImageView) getView().findViewById(R.id.sendBtn);
         //sendBtn.setClickable(true);
 
+        record_message  = (ImageView) getView().findViewById(R.id.record_message);
+
         queryEditText = getView().findViewById(R.id.queryEditText);
         queryEditText.setOnKeyListener((v, keyCode, event) -> {
             if (event.getAction() == KeyEvent.ACTION_DOWN) {
                 switch (keyCode) {
                     case KeyEvent.KEYCODE_DPAD_CENTER:
                     case KeyEvent.KEYCODE_ENTER:
-                        sendMessage(sendBtn);
+                        sendMessage();
                         return true;
                     default:
                         break;
@@ -254,14 +342,59 @@ public class ChatFragment extends Fragment {
         sendBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                sendMessage(sendBtn);
+                sendMessage();
             }
         });
 
+        record_message.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
 
-        // or  (ImageView) view.findViewById(R.id.foo);
+                Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+                intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+                intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE,Locale.getDefault());
+                intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, "zh");
+                intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, "zh");
+                intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, "zh");
+                intent.putExtra(RecognizerIntent.EXTRA_SUPPORTED_LANGUAGES, "zh");
+                intent.putExtra(RecognizerIntent.EXTRA_ONLY_RETURN_LANGUAGE_PREFERENCE,"zh");
+                intent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, "zh");
+                intent.putExtra(RecognizerIntent.EXTRA_RESULTS, "zh");
+                intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Hi! Record your message");
+
+                try{
+
+                    startActivityForResult(intent,REQUEST_CODE_SPEECH_INPUT);
+                }catch (Exception e){
+                    e.printStackTrace();
+                    Toast.makeText(getActivity(),e.getMessage(),Toast.LENGTH_SHORT ).show();
+                };
+            }
+        });
     }
+    //------------------------------------------------------------------------------------------------------//
 
+
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        switch (requestCode){
+            case REQUEST_CODE_SPEECH_INPUT:
+                if(resultCode == RESULT_OK && null!=data){
+                    ArrayList<String> result = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
+                    queryEditText.setText(result.get(0));
+                    sendMessage();
+                }
+                break;
+
+
+        }
+    }
+    //------------------------------------------------------------------------------------------------------//
+
+    /**
+     * initialising the chatbot by making handshake with dialogflow api
+     */
     private void initChatbot(){
         final AIConfiguration config =  new AIConfiguration(dialogFlowKey,
                 AIConfiguration.SupportedLanguages.English,AIConfiguration.RecognitionEngine.System);
@@ -270,49 +403,13 @@ public class ChatFragment extends Fragment {
         aiRequest = new AIRequest();
 
     }
+    //------------------------------------------------------------------------------------------------------//
 
 
-    /*public String translateToEnglish(String message){
-
-        getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-
-
-                languageIdentifier.identifyLanguage(message).addOnSuccessListener(new OnSuccessListener<String>() {
-                    @Override
-                    public void onSuccess(String languageCode) {
-
-                        if (languageCode != "und" && languageCode.equals("zh")) {
-
-                            chineseEnglishTranslator.downloadModelIfNeeded(chineseToEnglishConditions).addOnSuccessListener(new OnSuccessListener<Void>() {
-                                @Override
-                                public void onSuccess(Void aVoid) {
-
-                                    chineseEnglishTranslator.translate(message).addOnSuccessListener(new OnSuccessListener<String>() {
-                                        @Override
-                                        public void onSuccess(String s) {
-                                            translatedText=s;
-                                        }
-                                    });
-
-                                }
-                            });
-                            //Log.i(TAG, "Language: " + languageCode);
-                            //Log.i(TAG, "Language: translated" + translatedText);
-
-                        } else {
-                            translatedText =message;
-                        }
-                    }
-                });
-
-            }
-        });
-
-                  return translatedText;
-    }*/
-
+    /**
+     * animations used for handling chat conversations
+     * @param img
+     */
     private void fadeOutAndHideView(final MaterialCardView img)
     {
         Animation fadeOut = new AlphaAnimation(1, 0);
@@ -332,12 +429,14 @@ public class ChatFragment extends Fragment {
         img.startAnimation(fadeOut);
     }
 
+    //------------------------------------------------------------------------------------------------------//
+
     /**
      * sendMessage is used to send the query to dialogfow and make an async request to get bot's response
      * The method alsp checks whether the input is in english or chinese and translates accordingly.
-     * @param view
+     *
      */
-    public void sendMessage(View view) {
+    public void sendMessage() {
 
         String msg = queryEditText.getText().toString();
         //String response = translateToEnglish(msg);
@@ -410,6 +509,8 @@ public class ChatFragment extends Fragment {
             requestTask.execute(aiRequest);*/
         }
     }
+
+    //------------------------------------------------------------------------------------------------------//
 
     /**
      * This method is used to display the reply based on user's / bot's text.
@@ -571,6 +672,9 @@ public class ChatFragment extends Fragment {
         queryEditText.requestFocus(); // change focus back to edit text to continue typing
     }
 
+    //------------------------------------------------------------------------------------------------------//
+// layouts to display text in user/bot style
+
     FrameLayout getUserLayout() {
         LayoutInflater inflater = LayoutInflater.from(getActivity());
         return (FrameLayout) inflater.inflate(R.layout.user_msg_layout, null);
@@ -580,6 +684,9 @@ public class ChatFragment extends Fragment {
         LayoutInflater inflater = LayoutInflater.from(getActivity());
         return (FrameLayout) inflater.inflate(R.layout.bot_msg_layout, null);
     }
+
+    //------------------------------------------------------------------------------------------------------//
+
 
     /**
      * The callback method to receive bot's response
@@ -597,6 +704,8 @@ public class ChatFragment extends Fragment {
             showTextView("There was a problem please try again!", BOT);
         }
     }
+
+    //------------------------------------------------------------------------------------------------------//
 
     @Override
     public void onDestroy() {

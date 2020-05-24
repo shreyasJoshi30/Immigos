@@ -1,6 +1,7 @@
 package com.example.welcomebot;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
@@ -8,6 +9,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -17,20 +19,32 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 
 import com.bumptech.glide.Glide;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.card.MaterialCardView;
+import com.google.firebase.ml.common.modeldownload.FirebaseModelDownloadConditions;
+import com.google.firebase.ml.naturallanguage.FirebaseNaturalLanguage;
+import com.google.firebase.ml.naturallanguage.translate.FirebaseTranslateLanguage;
+import com.google.firebase.ml.naturallanguage.translate.FirebaseTranslator;
+import com.google.firebase.ml.naturallanguage.translate.FirebaseTranslatorOptions;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.w3c.dom.Text;
 
 import java.io.IOException;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
 import okhttp3.Call;
@@ -39,8 +53,12 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
+import static android.content.Context.MODE_PRIVATE;
 import static android.text.Layout.JUSTIFICATION_MODE_INTER_WORD;
 
+/**
+ * The home fragment is used for displaying news from news API
+ */
 public class HomeFragment extends Fragment {
 
 
@@ -56,6 +74,7 @@ public class HomeFragment extends Fragment {
     String eventBriteAPI_key;
     String country = "au";
     String newsCategory = "";
+    ProgressBar progressBar;
 
     //used for reinflating view
     private LayoutInflater mInflater;
@@ -69,7 +88,20 @@ public class HomeFragment extends Fragment {
     Button btn_sports;
     Button btn_technology;
 
+    String defaultLanguage = "NA";
 
+    FirebaseTranslator englishChineseTranslator;
+    FirebaseModelDownloadConditions englishToChineseConditions;
+
+
+    String tr_title;
+    String tr_desc;
+    int cardlength = 0;
+    int currentCard = 0;
+    BottomNavigationView bottomNavigationView;
+
+
+    //------------------------------------------------------------------------------------------------------//
 
     @Nullable
     @Override
@@ -80,11 +112,59 @@ public class HomeFragment extends Fragment {
         mContainer = container;
         rootView = inflater.inflate(R.layout.fragment_home,container,false);
         setHasOptionsMenu(true);
+        bottomNavigationView  = getActivity().findViewById(R.id.bottom_navigationid);
+
+        progressBar = rootView.findViewById(R.id.loading_news);
+        progressBar.setVisibility(View.VISIBLE);
+
         eventBriteAPI_key = getActivity().getResources().getString(R.string.eventBriteAPI_key);
         newsAPIKey = getActivity().getResources().getString(R.string.newsAPI_key);
         layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
         cardParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-        getNews(country,newsCategory);
+
+        ((AppCompatActivity)getActivity()).getSupportActionBar().setHomeAsUpIndicator(null);
+
+        SharedPreferences pref = getActivity().getSharedPreferences("myPrefs",MODE_PRIVATE);
+        defaultLanguage =pref.getString("isChinese","au");
+
+
+        if(defaultLanguage.equals("cn")){
+            ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle("新闻");
+
+            enableBotttomNav(false);
+        }
+        else{
+            ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle("News");
+
+        }
+
+
+
+
+        getNews(defaultLanguage,country,newsCategory);
+
+
+        //---------------------english chinese translator-------------------
+
+        FirebaseTranslatorOptions englishToChineseOptions =
+                new FirebaseTranslatorOptions.Builder()
+                        .setSourceLanguage(FirebaseTranslateLanguage.EN)
+                        .setTargetLanguage(FirebaseTranslateLanguage.ZH)
+                        .build();
+        englishChineseTranslator =
+                FirebaseNaturalLanguage.getInstance().getTranslator(englishToChineseOptions);
+
+        englishToChineseConditions = new FirebaseModelDownloadConditions.Builder()
+                .build();
+
+        englishChineseTranslator.downloadModelIfNeeded(englishToChineseConditions).addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                //isAuCndownloaded  = true;
+             //   Toast.makeText(getContext(), "English-Chinese translator downloaded", Toast.LENGTH_LONG).show();
+            }
+        });
+        //---------------------english chinese translator-------------------
 
 
         //--------------------Button onclick listeners ---------------------------
@@ -95,7 +175,7 @@ public class HomeFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 homeLayout.removeAllViews();
-                getNews(country,"business");
+                getNews(defaultLanguage,country,"business");
             }
         });
 
@@ -105,7 +185,7 @@ public class HomeFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 homeLayout.removeAllViews();
-                getNews(country,"entertainment");
+                getNews(defaultLanguage,country,"entertainment");
             }
         });
 
@@ -115,7 +195,7 @@ public class HomeFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 homeLayout.removeAllViews();
-                getNews(country,"health");
+                getNews(defaultLanguage,country,"health");
             }
         });
 
@@ -124,7 +204,7 @@ public class HomeFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 homeLayout.removeAllViews();
-                getNews(country,"science");
+                getNews(defaultLanguage,country,"science");
             }
         });
         btn_sports = (Button) rootView.findViewById(R.id.btn_sports);
@@ -132,7 +212,7 @@ public class HomeFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 homeLayout.removeAllViews();
-                getNews(country,"sports");
+                getNews(defaultLanguage,country,"sports");
             }
         });
         btn_technology = (Button) rootView.findViewById(R.id.btn_technology);
@@ -140,15 +220,39 @@ public class HomeFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 homeLayout.removeAllViews();
-                getNews(country,"technology");
+                getNews(defaultLanguage,country,"technology");
             }
         });
 
 
+        if(defaultLanguage.equals("cn")){
 
-       return rootView;
+            changeLabelToChinese();
+        }else{
+            changeLabelToEnglish();
+        }
+
+
+
+        return rootView;
+    }
+    //------------------------------------------------------------------------------------------------------//
+
+    /**
+     * method to enable or disable the bottom navigationview based on condition
+     * @param value boolean value determines the condition for toggling the bottom menu
+     */
+    public void enableBotttomNav(Boolean value){
+
+        BottomNavigationView bottomNavigationView = (BottomNavigationView) getActivity().findViewById(R.id.bottom_navigationid);
+        bottomNavigationView.getMenu().getItem(0).setEnabled(value);
+        bottomNavigationView.getMenu().getItem(1).setEnabled(value);
+        bottomNavigationView.getMenu().getItem(2).setEnabled(value);
+        bottomNavigationView.getMenu().getItem(3).setEnabled(value);
+        bottomNavigationView.getMenu().getItem(4).setEnabled(value);
     }
 
+    //------------------------------------------------------------------------------------------------------//
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
@@ -170,23 +274,57 @@ public class HomeFragment extends Fragment {
         int id = item.getItemId();
 
         if(id == R.id.app_bar_China){
+
+            SharedPreferences pref = getActivity().getSharedPreferences("myPrefs",MODE_PRIVATE);
+            SharedPreferences.Editor editor = pref.edit();
+            editor.putString("isChinese","cn");
+            editor.commit();
+            defaultLanguage = "cn";
+
             homeLayout.removeAllViews();
-            country = "cn";
+            country = "au";
             newsCategory="";
             changeLabelToChinese();
-            getNews(country,newsCategory);
+            enableBotttomNav(false);
+            getNews(defaultLanguage,country,newsCategory);
         }
 
         if(id == R.id.app_bar_australia){
+
+            SharedPreferences pref = getActivity().getSharedPreferences("myPrefs",MODE_PRIVATE);
+            SharedPreferences.Editor editor = pref.edit();
+            editor.putString("isChinese","au");
+            editor.commit();
+            defaultLanguage = "au";
+
             country = "au";
             newsCategory="";
             homeLayout.removeAllViews();
             changeLabelToEnglish();
-            getNews(country,newsCategory);
+            getNews(defaultLanguage,country,newsCategory);
+        }
+
+        if(id == R.id.app_bar_about){
+
+            Intent intent = new Intent(getActivity(), AboutActivity.class);
+            intent.putExtra("SCREEN", "about");
+            startActivity(intent);
+
+        }
+
+        if(id == android.R.id.home){
+            BottomNavigationView bottomNavigationView  = getActivity().findViewById(R.id.bottom_navigationid);
+            bottomNavigationView.setSelectedItemId(R.id.nav_landingPage);
+            getActivity().getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.fragment_container, new LandingPageFragment())
+                    .commit();
+
         }
 
         return super.onOptionsItemSelected(item);
     }
+    //------------------------------------------------------------------------------------------------------//
 
 
     /**
@@ -200,10 +338,22 @@ public class HomeFragment extends Fragment {
         btn_science.setText("科学");
         btn_sports.setText("体育");
         btn_technology.setText("技术");
+        ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle("新闻");
+
+        bottomNavigationView.getMenu().getItem(0).setTitle("家园");
+        bottomNavigationView.getMenu().getItem(1).setTitle(getActivity().getResources().getString(R.string.tr_icon_news));
+        bottomNavigationView.getMenu().getItem(2).setTitle(getActivity().getResources().getString(R.string.tr_icon_chat));
+        bottomNavigationView.getMenu().getItem(3).setTitle(getActivity().getResources().getString(R.string.tr_icon_events));
+        bottomNavigationView.getMenu().getItem(4).setTitle(getActivity().getResources().getString(R.string.tr_icon_explore));
+
 
 
     }
+    //------------------------------------------------------------------------------------------------------//
 
+    /**
+     * method to change the labels to english based on language preference
+     */
     public void changeLabelToEnglish(){
         btn_business.setText("Business");
         btn_entertainment.setText("Entertainment");
@@ -211,8 +361,18 @@ public class HomeFragment extends Fragment {
         btn_science.setText("Science");
         btn_sports.setText("Sports");
         btn_technology.setText("Technology");
+        ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle("News");
+
+        bottomNavigationView.getMenu().getItem(0).setTitle("Home");
+        bottomNavigationView.getMenu().getItem(1).setTitle(getActivity().getResources().getString(R.string.icon_news));
+        bottomNavigationView.getMenu().getItem(2).setTitle(getActivity().getResources().getString(R.string.icon_chat));
+        bottomNavigationView.getMenu().getItem(3).setTitle(getActivity().getResources().getString(R.string.icon_events));
+        bottomNavigationView.getMenu().getItem(4).setTitle(getActivity().getResources().getString(R.string.icon_explore));
+
 
     }
+    //------------------------------------------------------------------------------------------------------//
+
 
    /* public void run () throws IOException{
 
@@ -248,6 +408,7 @@ public class HomeFragment extends Fragment {
             }
         });
     }*/
+    //------------------------------------------------------------------------------------------------------//
 
 
     /**
@@ -255,8 +416,10 @@ public class HomeFragment extends Fragment {
      * @param country
      * @param newsCategory
      */
-    public void getNews(String country, String newsCategory){
+    public void getNews(String newsLanguage,String country, String newsCategory){
 
+
+        enableBotttomNav(false);
         OkHttpClient client = new OkHttpClient().newBuilder()
                 .build();
 
@@ -301,11 +464,12 @@ public class HomeFragment extends Fragment {
                             containerCardLayout.setLayoutParams(scrollParams);
                             containerCardLayout.setOrientation(LinearLayout.VERTICAL);
                             scrollView.addView(containerCardLayout);
-
+                            cardlength = Jarray.length();
                             for (int i = 0; i < Jarray.length(); i++) {
+                                currentCard = i+1;
                                 JSONObject object = Jarray.getJSONObject(i);
 
-                                String title  = object.getString("title");
+                                String title = object.getString("title");
                                 String desc = object.getString("description");
                                 String imageurl = object.getString("urlToImage");
                                 String content = object.getString("content");
@@ -314,11 +478,38 @@ public class HomeFragment extends Fragment {
 
                                 //create multiple cards....
 
-                                layoutParams.setMargins(30,30,30,30);
+                                layoutParams.setMargins(30, 30, 30, 30);
 
-                                MaterialCardView cardView = createCard(title,desc,content,newsUrl,imageurl);
+                                if (defaultLanguage.equals("au")) {
 
-                                containerCardLayout.addView(cardView,layoutParams);
+                                    MaterialCardView cardView = createCard(title, desc, content, newsUrl, imageurl);
+                                    containerCardLayout.addView(cardView, layoutParams);
+                                }
+                                else{
+
+                                    englishChineseTranslator.translate(title).addOnSuccessListener(new OnSuccessListener<String>() {
+                                        @Override
+                                        public void onSuccess(String sr) {
+
+                                            //tr_title = sr;
+
+                                            englishChineseTranslator.translate(desc).addOnSuccessListener(new OnSuccessListener<String>() {
+                                                @Override
+                                                public void onSuccess(String s) {
+
+                                                    tr_title = sr;
+                                                    tr_desc = s;
+                                                    MaterialCardView cardView = createCard(tr_title, tr_desc, content, newsUrl, imageurl);
+                                                    containerCardLayout.addView(cardView, layoutParams);
+                                                }
+                                            });
+
+                                        }
+                                    });
+
+
+
+                                }
 
                             }
 
@@ -333,8 +524,10 @@ public class HomeFragment extends Fragment {
         });
 
 
+
     }
 
+    //------------------------------------------------------------------------------------------------------//
 
     /**
      * The method is used to create dynamic material cardviews for displaying news
@@ -347,13 +540,15 @@ public class HomeFragment extends Fragment {
      */
     public MaterialCardView  createCard(String title, String desc, String content, String newsUrl, String imageurl){
 
-        LinearLayout cardLayout = new LinearLayout(getActivity());
+
+
+        LinearLayout cardLayout = new LinearLayout(getContext());
         cardLayout.setOrientation(LinearLayout.VERTICAL);
             LinearLayout.LayoutParams LLParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT
                 ,LinearLayout.LayoutParams.MATCH_PARENT);
         cardLayout.setLayoutParams(LLParams);
 
-        MaterialCardView cardView = new MaterialCardView(getActivity());
+        MaterialCardView cardView = new MaterialCardView(getContext());
         cardView.setRadius(15);
 
         cardView.setCardBackgroundColor(Color.parseColor("#FFFFFF"));
@@ -362,29 +557,72 @@ public class HomeFragment extends Fragment {
         cardView.setCardElevation(9);
 
         //Textview that will contain the title of news bulletin
-        TextView newsTitle = new TextView(getActivity());
+        TextView newsTitle = new TextView(getContext());
         newsTitle.setLayoutParams(layoutParams);
         newsTitle.setText(title);
+        newsTitle.setTextIsSelectable(true);
         newsTitle.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 18);
         newsTitle.setTextColor(Color.BLACK);
 
         // Textview that will contain the short description
-        TextView tv = new TextView(getActivity());
+        TextView tv = new TextView(getContext());
         tv.setLayoutParams(layoutParams);
         tv.setText(desc);
+        tv.setTextIsSelectable(true);
         tv.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
         tv.setTextColor(Color.BLACK);
 
-        ImageView newsImage = new ImageView(getActivity());
+        ImageView newsImage = new ImageView(getContext());
         newsImage.setScaleType(ImageView.ScaleType.FIT_CENTER);
-        Glide.with(getActivity()).load(imageurl).into(newsImage);
+        Glide.with(getContext()).load(imageurl).into(newsImage);
         //newsImage.setImageResource(R.drawable.ic_whatshot_black_24dp);
 
         // Textview that will contain the short content
 
-        TextView tvContent = new TextView(getActivity());
-        tvContent.setLayoutParams(layoutParams);
+        RelativeLayout sharelayout = new RelativeLayout(getContext());
+        RelativeLayout.LayoutParams sharelayoutparams = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT);
+        //sharelayout.setOrientation(LinearLayout.HORIZONTAL);
+        //sharelayout.setBackgroundColor(Color.BLACK);
+        sharelayout.setLayoutParams(sharelayoutparams);
 
+        RelativeLayout.LayoutParams sharecontentlayoutparams = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT);
+
+        TextView sharecontent = new TextView(getContext());
+        sharecontent.setLayoutParams(sharecontentlayoutparams);
+        sharecontent.setText("");
+        sharecontent.setCompoundDrawablesWithIntrinsicBounds(0,0,R.drawable.ic_share_blue_24dp,0);
+        sharecontent.setGravity(Gravity.RIGHT);
+
+        sharecontent.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                String shareMessage = "";
+                String news="Headline:\n"+title+"\n\n"+desc + "\n\nInfo:\n"+ newsUrl  ;
+                if (defaultLanguage.equals("cn")){
+                    shareMessage = "分享使用";
+                }else{
+                    shareMessage = "Share using";
+                }
+
+                Intent shareIntent = new Intent(Intent.ACTION_SEND);
+                shareIntent.setType("text/plain");
+                shareIntent.putExtra(Intent.EXTRA_TEXT,news);
+                startActivity(Intent.createChooser(shareIntent,shareMessage));
+
+            }
+        });
+
+
+       /* RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams)sharecontent.getLayoutParams();
+        params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+        sharecontent.setLayoutParams(params); //causes layout update
+*/
+
+
+        TextView tvContent = new TextView(getContext());
+        tvContent.setLayoutParams(layoutParams);
+        tvContent.setTextIsSelectable(true);
         if(country.equals("au") || country.equals("") ){
             tvContent.setText(clickable);
         }
@@ -416,12 +654,29 @@ public class HomeFragment extends Fragment {
         //scrollView.setLayoutParams(layoutParams);
         //scrollView.addView(cardLayout);
         cardLayout.addView(newsTitle);
+
+
+
         cardLayout.addView(tv);
-        cardLayout.addView(tvContent);
+
+        //cardLayout.addView(tvContent);
+
+        cardLayout.addView(sharelayout);
+        sharelayout.addView(tvContent);
+        sharelayout.addView(sharecontent);
         cardView.addView(cardLayout);
+
+        if(currentCard == cardlength){
+
+            System.out.println(currentCard);
+            progressBar.setVisibility(View.GONE);
+            enableBotttomNav(true);
+        }
+
         return cardView;
 
     }
 
+    //------------------------------------------------------------------------------------------------------//
 
 }

@@ -1,8 +1,8 @@
 /build
-
+/build_apk
 /google-services.json
 
-strings.xml
+#strings.xml
 
 *.apk
 *.aar
