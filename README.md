@@ -1,6 +1,12 @@
 # Immigos
 The application will act as an emotional assistant which will engage in simple communications and allow the users to express their concerns. The application will recommend various activities based on user interests and track their emotions to show a progress and little victories to motivate the user.
 
+### Firebase setup
+
+The application must have a google-services.json file which can be downloaded from your firebase project. The file can be found from the project settings page. Place the file under the root(app) folder of the project.
+
+https://support.google.com/firebase/answer/7015592?hl=en
+
 #### Application Dependencies and API Keys
 
 The application will require the user to sign up for following API Keys
@@ -15,6 +21,8 @@ The application will require the user to sign up for following API Keys
 
 5- Firebase The application will require google-services.JSON under the root(app) folder
 
+6- Google Places API key (https://developers.google.com/places/web-service/intro)
+
 Create the string resources as shown below and fill the values by obtaining the keys.
 
 ```xml
@@ -22,6 +30,7 @@ Create the string resources as shown below and fill the values by obtaining the 
     <string name="newsAPI_key">Your_key</string>
     <string name="eventBriteAPI_key">Your_key</string>
     <string name="googleMaps_key">Your_key</string>
+    <string name="placesAPI_key">mykey</string>
     <string name="eventfinda_username">username</string>
     <string name="eventfinda_password">password</string>
 ```
