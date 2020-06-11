@@ -22,6 +22,8 @@ The application will require the user to sign up for following API Keys
 
 5- Firebase The application will require google-services.JSON under the root(app) folder
 
+6- Google Places API key (https://developers.google.com/places/web-service/intro)
+
 Create a strings.xml file under res/values/  and add all the api keys as shown below.
 
 ```xml
